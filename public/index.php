@@ -1,43 +1,32 @@
 <?php
-// carrega as configs
-require_once __DIR__ . '/../config/config.php';
-
-// autoload simples para controllers, models e core
-spl_autoload_register(function ($class) {
-    $paths = [
-        __DIR__ . '/../app/controllers/',
-        __DIR__ . '/../app/models/',
-        __DIR__ . '/../app/core/'
-    ];
-    foreach ($paths as $path) {
-        $file = $path . $class . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
-    }
-});
-
+declare(strict_types=1);
 session_start();
 
-// rota simples (ex.: /transactions/create)
-$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
-$path = ltrim(substr($uri, strlen($base)), '/');
+// Caminhos físicos
+if (!defined('BASE_PATH')) define('BASE_PATH', dirname(__DIR__));
+if (!defined('APP_PATH'))  define('APP_PATH', BASE_PATH . '/app');
 
-// rota padrão -> home
-if ($path === '' || $path === 'home') {
-    echo "<h1>Bem-vindo ao DinDin 💰</h1>";
-    exit;
-}
+// Detecta BASE_URI automaticamente a partir do diretório do script
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '/DinDin/public/index.php';
+$publicUri  = rtrim(str_replace('\\','/', dirname($scriptName)), '/');
+define('BASE_URI', $publicUri === '/' ? '/' : $publicUri);
 
-[$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
-$controller = ucfirst($ctrl) . 'Controller';
+// Autoload
+require_once APP_PATH . '/core/Autoload.php';
+Autoload::register();
 
-// verifica se controller e action existem
-if (class_exists($controller) && method_exists($controller, $action)) {
-    (new $controller)->$action();
-} else {
-    http_response_code(404);
-    echo "<h1>404 - Página não encontrada</h1>";
-}
+// Config (não redefina BASE_URI aqui)
+require_once BASE_PATH . '/config/config.php';
+
+// Sobe o app e o roteador
+require_once APP_PATH . '/core/App.php';
+require_once APP_PATH . '/core/Router.php';
+
+$app    = new App(BASE_URI);
+$router = new Router($app);
+
+// Carrega as rotas
+require_once APP_PATH . '/routes/web.php';
+
+// Despacha
+$router->dispatch();

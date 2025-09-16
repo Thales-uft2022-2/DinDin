@@ -1,5 +1,9 @@
 RewriteEngine On
-RewriteBase /DinDin/public/
+
+# se você estiver servindo de um subcaminho, ajuste a base (geralmente não precisa)
+# RewriteBase /
+
+# envia tudo para index.php (exceto arquivos/pastas reais)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+RewriteRule ^ index.php [L]
