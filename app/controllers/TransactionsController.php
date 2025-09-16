@@ -3,13 +3,67 @@ class TransactionsController
 {
     public function index()
     {
-        $model = new TransactionModel();
-        $userId = $_SESSION['user_id'] ?? null; // se quiser filtrar por usuário
-        $transactions = $model->all($userId);
+        // coleta filtros da querystring
+        $q          = trim($_GET['q'] ?? '');
+        $type       = $_GET['type'] ?? '';
+        $date_from  = $_GET['date_from'] ?? '';
+        $date_to    = $_GET['date_to'] ?? '';
+        $amin_raw   = trim($_GET['amount_min'] ?? '');
+        $amax_raw   = trim($_GET['amount_max'] ?? '');
+        $page       = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-        $base = BASE_URL;
+        // normaliza valores (aceita "1.234,56")
+        $normalizeMoney = function($s) {
+            if ($s === '' || $s === null) return '';
+            $n = str_replace(['.',','],['','.' ], $s);
+            return is_numeric($n) ? $n : '';
+        };
+        $amount_min = $normalizeMoney($amin_raw);
+        $amount_max = $normalizeMoney($amax_raw);
+
+        // valida datas simples (YYYY-MM-DD)
+        $isValidDate = function($d) {
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) return false;
+            [$Y,$m,$dd] = array_map('intval', explode('-', $d));
+            return checkdate($m,$dd,$Y);
+        };
+        if ($date_from && !$isValidDate($date_from)) $date_from = '';
+        if ($date_to   && !$isValidDate($date_to))   $date_to   = '';
+
+        $filters = [
+            'q'           => $q ?: null,
+            'type'        => in_array($type, ['Receita','Despesa'], true) ? $type : null,
+            'date_from'   => $date_from ?: null,
+            'date_to'     => $date_to ?: null,
+            'amount_min'  => $amount_min,
+            'amount_max'  => $amount_max,
+        ];
+
+        $model  = new TransactionModel();
+        $userId = null; // filtre por usuário se quiser
+        $per    = 10;
+
+        $result = $model->search($filters, $userId, $page, $per);
+
+        $transactions = $result['rows'];
+        $total        = $result['total'];
+        $perPage      = $result['perPage'];
+        $currentPage  = $result['page'];
+        $base         = BASE_URL;
+
+        // manter filtros na view
+        $persist = [
+            'q'          => $q,
+            'type'       => $type,
+            'date_from'  => $date_from,
+            'date_to'    => $date_to,
+            'amount_min' => $amin_raw,
+            'amount_max' => $amax_raw,
+        ];
+
         include APP_PATH . '/views/transactions/index.php';
     }
+
 
     public function create()
     {
@@ -19,7 +73,7 @@ class TransactionsController
         // dados vazios para o form
         $data = [
             'id'               => null,
-            'type'             => 'income',
+            'type'             => 'Receita',
             'category'         => '',
             'description'      => '',
             'amount'           => '',
@@ -54,7 +108,7 @@ class TransactionsController
         $userId = $_SESSION['user_id'] ?? 1; // provisório
 
         $errors = [];
-        if (!in_array($type, ['income','expense'], true)) $errors[] = 'Tipo inválido';
+        if (!in_array($type, ['Receita','Despesa'], true)) $errors[] = 'Tipo inválido';
         if ($amount <= 0) $errors[] = 'Valor deve ser maior que zero';
         if ($category === '') $errors[] = 'Categoria é obrigatória';
         if (!$validDate) $errors[] = 'Data inválida (YYYY-MM-DD)';
@@ -149,7 +203,7 @@ class TransactionsController
         }
 
         $errors = [];
-        if (!in_array($type, ['income','expense'], true)) $errors[] = 'Tipo inválido';
+        if (!in_array($type, ['Receita','Despesa'], true)) $errors[] = 'Tipo inválido';
         if ($amount <= 0) $errors[] = 'Valor deve ser maior que zero';
         if ($category === '') $errors[] = 'Categoria é obrigatória';
         if (!$validDate) $errors[] = 'Data inválida (YYYY-MM-DD)';

@@ -19,12 +19,12 @@
     <input type="hidden" name="id" value="<?= htmlspecialchars($data['id']) ?>">
   <?php endif; ?>
 
-  <label>Tipo:
-    <select name="type" required>
-      <option value="income"  <?= $data['type']==='income'  ? 'selected' : '' ?>>Receita</option>
-      <option value="expense" <?= $data['type']==='expense' ? 'selected' : '' ?>>Despesa</option>
-    </select>
-  </label><br><br>
+<label>Tipo:
+  <select name="type" required>
+    <option value="Receita" <?= ($data['type'] === 'Receita') ? 'selected' : '' ?>>Receita</option>
+    <option value="Despesa" <?= ($data['type'] === 'Despesa') ? 'selected' : '' ?>>Despesa</option>
+  </select>
+</label><br><br>
 
   <label>Categoria:
     <input type="text" name="category" value="<?= htmlspecialchars($data['category']) ?>" required>
