@@ -77,4 +77,72 @@ class TransactionsController
 
         echo '<p><a href="' . BASE_URL . '/transactions/create">Cadastrar outra</a></p>';
     }
+
+    // ========= MÉTODOS NOVOS: EDITAR TRANSAÇÃO ========= //
+
+    public function edit()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            echo "<p>ID não informado.</p>";
+            return;
+        }
+
+        $model = new TransactionModel();
+        $transaction = $model->findById($id);
+
+        if (!$transaction) {
+            echo "<p>Transação não encontrada.</p>";
+            return;
+        }
+
+        // inclui a view e passa os dados
+    include __DIR__ . '/../views/transactions/edit.php';
+}
+    
+
+    public function update()
+    {
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            echo "<p>ID não informado.</p>";
+            return;
+        }
+
+        $data = [
+            'type'        => $_POST['type'] ?? '',
+            'category'    => trim($_POST['category'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'amount'      => (float) ($_POST['amount'] ?? 0),
+            'date'        => $_POST['date'] ?: date('Y-m-d'),
+        ];
+
+        $errors = [];
+        if (!in_array($data['type'], ['income', 'expense'], true)) {
+            $errors[] = 'Tipo inválido';
+        }
+        if ($data['amount'] <= 0) {
+            $errors[] = 'Valor deve ser maior que zero';
+        }
+        if ($data['category'] === '') {
+            $errors[] = 'Categoria é obrigatória';
+        }
+
+        if ($errors) {
+            foreach ($errors as $e) {
+                echo '<p style="color:red;">' . htmlspecialchars($e) . '</p>';
+            }
+            echo '<p><a href="' . BASE_URL . '/transactions/edit?id=' . $id . '">Voltar</a></p>';
+            return;
+        }
+
+        $model = new TransactionModel();
+        if ($model->update($id, $data)) {
+            echo '<h2>✅ Transação atualizada com sucesso!</h2>';
+        } else {
+            echo '<h2>❌ Erro ao atualizar transação.</h2>';
+        }
+
+        echo '<p><a href="' . BASE_URL . '/transactions/index">Voltar</a></p>';
+    }
 }
