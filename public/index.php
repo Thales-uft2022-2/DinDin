@@ -27,7 +27,7 @@ $path = ltrim(substr($uri, strlen($base)), '/');
 
 // rota padrão -> home
 if ($path === '' || $path === 'home') {
-    echo "<h1>Bem-vindo ao DinDin 💰</h1>";
+    include __DIR__ . '/../app/views/home.php';
     exit;
 }
 
