@@ -93,6 +93,21 @@ include __DIR__ . '/../views/transactions/message.php';
         $model = new TransactionModel();
         $transactions = $model->findAll();
 
+            // Capturar parâmetros de filtro
+        $filters = [
+            'type' => $_GET['type'] ?? '',
+            'category' => $_GET['category'] ?? '',
+            'description' => $_GET['description'] ?? '',
+            'start_date' => $_GET['start_date'] ?? '',
+            'end_date' => $_GET['end_date'] ?? ''
+        ];
+        
+        // Buscar transações com filtros
+        $transactions = $model->findWithFilters($filters);
+        
+        // Buscar categorias únicas para o dropdown
+        $categories = $model->getUniqueCategories();
+
         include __DIR__ . '/../views/transactions/index.php';
     }
 

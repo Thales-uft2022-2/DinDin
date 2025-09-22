@@ -64,4 +64,52 @@ public function delete($id) {
     return $stmt->execute([$id]);
 }
 
+// <<< ADICIONADO: filtragem/busca
+public function findWithFilters($filters) 
+{
+    $sql = "SELECT * FROM transactions WHERE 1=1";
+    $params = [];
+    
+    // Filtro por tipo
+    if (!empty($filters['type'])) {
+        $sql .= " AND type = ?";
+        $params[] = $filters['type'];
+    }
+    
+    // Filtro por categoria (busca parcial)
+    if (!empty($filters['category'])) {
+        $sql .= " AND category LIKE ?";
+        $params[] = '%' . $filters['category'] . '%';
+    }
+    
+    // Filtro por descrição (busca parcial)
+    if (!empty($filters['description'])) {
+        $sql .= " AND description LIKE ?";
+        $params[] = '%' . $filters['description'] . '%';
+    }
+    
+    // Filtro por período
+    if (!empty($filters['start_date'])) {
+        $sql .= " AND date >= ?";
+        $params[] = $filters['start_date'];
+    }
+    
+    if (!empty($filters['end_date'])) {
+        $sql .= " AND date <= ?";
+        $params[] = $filters['end_date'];
+    }
+    
+    $sql .= " ORDER BY date DESC";
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+public function getUniqueCategories()
+{
+    $sql = "SELECT DISTINCT category FROM transactions ORDER BY category";
+    $stmt = $this->db->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
 }
