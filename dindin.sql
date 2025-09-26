@@ -1,66 +1,48 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Tempo de geração: 17/09/2025 às 15:10
--- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
+CREATE DATABASE IF NOT EXISTS `dindin`;
+USE `dindin`;
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+-- Tabela de Usuários (principal)
+CREATE TABLE `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(255) UNIQUE NOT NULL,
+  `password` VARCHAR(255) NULL, -- Pode ser NULL para usuários que usam apenas Google OAuth
+  `name` VARCHAR(255) NOT NULL,
+  `avatar` VARCHAR(500) NULL, -- URL da imagem do Google ou upload
+  `provider` ENUM('email', 'google') DEFAULT 'email', -- Tipo de autenticação
+  `provider_id` VARCHAR(255) NULL, -- ID único do Google OAuth
+  `email_verified` BOOLEAN DEFAULT FALSE,
+  `verification_token` VARCHAR(100) NULL,
+  `reset_token` VARCHAR(100) NULL,
+  `reset_token_expires` DATETIME NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+  INDEX `idx_email` (`email`),
+  INDEX `idx_provider` (`provider`),
+  INDEX `idx_reset_token` (`reset_token`)
+);
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Banco de dados: `dindin`
---
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `transactions`
---
-
+-- Tabela de Transações (atualizada com user_id)
 CREATE TABLE `transactions` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
   `type` ENUM('income', 'expense') NOT NULL,
   `category` VARCHAR(100) NOT NULL,
   `description` VARCHAR(255),
   `amount` DECIMAL(10, 2) NOT NULL,
   `date` DATE NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_date` (`date`),
+  INDEX `idx_category` (`category`)
 );
 
-INSERT INTO `transactions` (`id`, `type`, `category`, `description`, `amount`, `date`, `created_at`) VALUES
-(1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16', '2025-09-16 00:12:37');
+-- Inserir usuário de exemplo (senha: "senha123" hash)
+INSERT INTO `users` (`email`, `password`, `name`, `email_verified`)
+VALUES ('usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Usuário Exemplo', TRUE);
 
---
--- Índices para tabelas despejadas
---
-
---
--- Índices de tabela `transactions`
---
-ALTER TABLE `transactions`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT para tabelas despejadas
---
-
---
--- AUTO_INCREMENT de tabela `transactions`
---
-ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- Atualizar transações existentes para associar ao usuário
+INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
+VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
