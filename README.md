@@ -1,3 +1,9 @@
+UFT- Campus Palmas
+Disciplina: Engenharia de Software 2025/2
+Professor: Dr Edeilson Milhomem da Silva
+
+Grupo: DinDIn 
+Integrantes: Caio, Cristian, Gabriel Portuguez, Thales, Vinicius Fernandes.
 # DinDin 💸
 
 **DinDin** é um aplicativo web simples e intuitivo para **gerenciamento de finanças pessoais e empresariais**.  
@@ -13,7 +19,50 @@ Com o **DinDin**, você pode:
 👉 O objetivo do MVP é oferecer **controle financeiro prático e acessível**, entregando valor desde o primeiro uso, sem burocracia.
 
 ---
+# Planejamento de Sprints
 
+## Sprint 1: Transações
+
+**Valor:** Registrar, gerenciar e consultar transações financeiras.
+
+### Tarefas:
+
+- **Cadastro de transações:**  
+  Como usuário, eu quero cadastrar uma transação de receita ou despesa com valor, data, categoria e descrição para manter meu controle financeiro organizado.
+
+- **Listagem de transações:**  
+  Como usuário, eu quero visualizar uma lista de todas as minhas transações ordenadas por data para acompanhar meu histórico financeiro.
+
+- **Filtragem e busca:**  
+  Como usuário, eu quero filtrar minhas transações por período de datas, tipo e categoria (receita ou despesa) para encontrar rapidamente informações específicas.
+
+- **Edição de transações:**  
+  Como usuário, eu quero editar uma transação existente para corrigir informações incorretas.
+
+- **Exclusão de transações:**  
+  Como usuário, eu quero excluir uma transação indevida para manter meu histórico atualizado e limpo.
+
+---
+
+## Sprint 2: Usuário & Autenticação
+
+**Valor:** Prover acesso seguro e confiável.
+
+### Tarefas:
+
+- **Criação de conta:**  
+  Como visitante, eu quero criar uma conta com e-mail e senha para começar a usar a plataforma.
+
+- **Login:**  
+  Como usuário cadastrado, eu quero realizar login com minhas credenciais ou como visitante, fazer login com minha conta Google para acessar minha conta de forma segura.
+
+- **Logout:**  
+  Como usuário, eu quero encerrar minha sessão para garantir a segurança da minha conta.
+
+- **Recuperação de senha:**  
+  Como usuário que esqueceu a senha, eu quero redefini-la através de um fluxo seguro para recuperar o acesso à minha conta.
+---
+### Features
 ## 📌 Sprint 1 — Transações
 
 ### US-Tx-01 — Adicionar Transação
@@ -92,73 +141,62 @@ Com o **DinDin**, você pode:
 ---
 
 ## 📌 Sprint 2 — Usuário & Autenticação
-
 ### US-Auth-01 — Registro de Usuário
-**Como** visitante  
-**Quero** criar uma conta informando e-mail e senha  
-**Para** acessar o sistema com meus próprios dados  
+**Como visitante, eu quero criar uma conta informando e-mail e senha, para acessar o sistema com meus próprios dados.**
 
-**Critérios de Aceite**
-- Dado que estou na página de registro  
-  Quando preencho e-mail válido e senha (mín. 8 caracteres) e envio  
-  Então minha conta é criada e sou direcionado(a) para a página inicial logado(a).  
-- Dado que já existe um usuário com esse e-mail  
-  Quando tento registrar novamente  
-  Então vejo uma mensagem “e-mail já cadastrado”.  
+**Critérios de Aceite:**
+- **Dado** que estou na página de registro,  
+  **Quando** preencho e-mail válido e senha (mín. 8 caracteres) e envio,  
+  **Então** minha conta é criada e sou direcionado(a) para a página inicial logado(a).
+  
+- **Dado** que já existe um usuário com esse e-mail,  
+  **Quando** tento registrar novamente,  
+  **Então** vejo uma mensagem “e-mail já cadastrado”.
 
 ---
 
 ### US-Auth-02 — Login
-**Como** usuário cadastrado  
-**Quero** entrar com e-mail e senha  
-**Para** acessar minhas funcionalidades  
+**Como usuário cadastrado ou visitante, eu quero entrar com e-mail e senha ou com minha conta Google para acessar minhas funcionalidades.**
 
-**Critérios de Aceite**
-- Dado que informo credenciais válidas  
-  Quando envio o formulário  
-  Então sou autenticado(a) e vejo a página inicial.  
-- Dado que informo credenciais inválidas  
-  Quando envio o formulário  
-  Então vejo uma mensagem clara de erro sem revelar detalhes de segurança.  
+**Critérios de Aceite:**
+- **Dado** que informo credenciais válidas (e-mail e senha) ou faço login com minha conta Google,  
+  **Quando** envio o formulário,  
+  **Então** sou autenticado(a) e vejo a página inicial.
+  
+- **Dado** que sou um visitante,  
+  **Quando** tento fazer login com minha conta Google pela primeira vez,  
+  **Então** uma conta será criada automaticamente com o e-mail do Google e serei redirecionado(a) para a página inicial.
 
+- **Dado** que sou um usuário que já tem uma conta registrada com o e-mail do Google,  
+  **Quando** faço login com a conta Google,  
+  **Então** sou autenticado(a) e redirecionado(a) para a página inicial.
+
+- **Dado** que informo credenciais inválidas (e-mail e senha),  
+  **Quando** envio o formulário,  
+  **Então** vejo uma mensagem clara de erro sem revelar detalhes de segurança.
 ---
 
 ### US-Auth-03 — Logout
-**Como** usuário autenticado  
-**Quero** sair da minha sessão  
-**Para** encerrar o acesso em dispositivos compartilhados  
+**Como usuário autenticado, eu quero sair da minha sessão para encerrar o acesso em dispositivos compartilhados.**
 
-**Critérios de Aceite**
-- Dado que estou logado(a)  
-  Quando clico em “Sair”  
-  Então minha sessão é finalizada e sou enviado(a) para a página de login.  
+**Critérios de Aceite:**
+- **Dado** que estou logado(a),  
+  **Quando** clico em “Sair”,  
+  **Então** minha sessão é finalizada e sou enviado(a) para a página de login.
 
 ---
 
-### US-Auth-04 — Lembrar sessão *(opcional)*
-**Como** usuário  
-**Quero** marcar “Lembrar-me” no login  
-**Para** permanecer logado(a) entre visitas  
+### US-Auth-04 — Recuperar Senha
+**Como usuário, eu quero receber um link/código para redefinir a senha para recuperar o acesso quando eu esquecer.**
 
-**Critérios de Aceite**
-- Dado que marco “Lembrar-me”  
-  Quando fecho e reabro o navegador  
-  Então continuo autenticado(a) até que eu faça logout.  
-
----
-
-### US-Auth-05 — Recuperar Senha *(opcional)*
-**Como** usuário  
-**Quero** receber um link/código para redefinir a senha  
-**Para** recuperar o acesso quando eu esquecer  
-
-**Critérios de Aceite**
-- Dado que informo um e-mail cadastrado  
-  Quando solicito “Esqueci minha senha”  
-  Então recebo instruções claras de redefinição.  
-- Dado que informo e-mail não cadastrado  
-  Quando solicito redefinição  
-  Então vejo mensagem genérica (“Se existir, enviaremos instruções”), sem vazar existência da conta.  
+**Critérios de Aceite:**
+- **Dado** que informo um e-mail cadastrado,  
+  **Quando** solicito “Esqueci minha senha”,  
+  **Então** recebo instruções claras de redefinição.
+  
+- **Dado** que informo e-mail não cadastrado,  
+  **Quando** solicito redefinição,  
+  **Então** vejo mensagem genérica (“Se existir, enviaremos instruções”), sem vazar existência da conta.
 
 ---
 
@@ -170,7 +208,7 @@ Com o **DinDin**, você pode:
 |--------------------------------------------|-------------------------|-----------|-----------|
 | Tela e função de cadastro de transação     | **US-Tx-01_cadastrar**  | Thales    | Caio      |
 | Tela e função de listar transações         | **US-Tx-02_listar**     | Gabriel      | Cristian  |
-| Tela e função de filtrar/buscar transações | **US-Tx-03_filtrar**    | Caio  | Vinicius  |
+| Tela e função de filtrar/buscar transações | **US-Tx-03_filtrar**    | Cristian  | Vinicius  |
 | Tela e função de editar transação          | **US-Tx-04_editar**     | Vinicius  | Gabriel   |
 | Botão e função de excluir transação        | **US-Tx-05_excluir**    | Cristian   | Thales    |
 
@@ -180,8 +218,7 @@ Com o **DinDin**, você pode:
 
 | Atividade                                  | Feature                 | Autor     | Revisor   |
 |--------------------------------------------|-------------------------|-----------|-----------|
-| Tela e função de registro de usuário       | **US-Auth-01_registro** | Gabriel   | Vinicius  |
-| Tela e função de login                     | **US-Auth-02_login**    | Vinicius  | Cristian  |
-| Tela e função de logout                    | **US-Auth-03_logout**   | Cristian  | Caio      |
-| Função “Lembrar-me” (opcional)             | **US-Auth-04_lembrar**  | Caio      | Thales    |
-| Função de recuperação de senha (opcional)  | **US-Auth-05_recuperar**| Thales    | Gabriel   |
+| Tela e função de registro de usuário       | **US-Auth-01_registro** | Gabriel   | Thales  |
+| Tela e função de login                     | **US-Auth-02_login**    | Thales  | Cristian  |
+| Função de logout                    | **US-Auth-03_logout**   | Vinicius  | Gabriel      |
+| Função de recuperação de senha             | **US-Auth-05_recuperar**| Cristian    | Vinicius   |
