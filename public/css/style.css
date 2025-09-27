@@ -252,3 +252,261 @@ input, select {
 .table-actions a:last-child:hover {
   text-decoration: underline;
 }
+
+/* FORMULÁRIO DE BUSCA */
+.search-container {
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    border-left: 4px solid #007BFF;
+}
+
+.search-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-row label {
+    flex: 1;
+    min-width: 180px;
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0;
+}
+
+.filter-row input,
+.filter-row select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.filter-row input:focus,
+.filter-row select:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* DATALIST STYLES */
+datalist {
+    background: white;
+    border: 1px solid #ccc;
+}
+
+/* BOTÕES DO FORMULÁRIO DE BUSCA */
+.filter-row .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    margin-top: 8px;
+}
+
+.filter-row .btn.primary {
+    background: #007BFF;
+    color: white;
+}
+
+.filter-row .btn.primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.filter-row .btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.filter-row .btn.secondary:hover {
+    background: #565e64;
+    transform: translateY(-2px);
+}
+
+/* INFO DE RESULTADOS */
+.results-info {
+    background: #e3f2fd;
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2196F3;
+    font-size: 1rem;
+}
+
+.results-info strong {
+    color: #1976D2;
+}
+
+/* BADGES E CORES PARA TIPOS */
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.badge-income {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.badge-expense {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f1b0b7;
+}
+
+.text-income {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.text-expense {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* MELHORIAS NA TABELA */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    padding: 15px;
+    text-align: left;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+/* RESPONSIVIDADE MELHORADA */
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter-row label {
+        min-width: 100%;
+    }
+    
+    .filter-row .btn {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .search-container {
+        padding: 15px;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* ESTILOS PARA O LINK "NOVA TRANSAÇÃO" */
+p > a {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+p > a:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.search-container {
+    max-width: 900px; /* Largura máxima */
+    margin: 0 auto; /* Centraliza horizontalmente */
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    border-left: 4px solid #007BFF;
+}
+
+.search-container h2 {
+    text-align: center; /* Centraliza o título */
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    justify-content: center; /* Centraliza os itens */
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-row label {
+    flex: 1;
+    min-width: 180px;
+    max-width: 250px; /* Largura máxima para cada campo */
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0;
+}
