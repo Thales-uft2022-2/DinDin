@@ -46,3 +46,6 @@ VALUES ('usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/a
 -- Atualizar transações existentes para associar ao usuário
 INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
 VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
+~
+~
+~
