@@ -222,6 +222,7 @@ Com o **DinDin**, você pode:
 | Tela e função de login                     | **US-Auth-07_login**    | Thales  | Cristian  |
 | Função de logout                           | **US-Auth-08_logout**   | Vinicius  | Gabriel      |
 | Função de recuperação de senha             | **US-Auth-09_recuperar**| Cristian    | Vinicius   |
+|
 
 ## 3ª Interação – MVC
 | Atividade                                              | Feature              | Autor    | Revisor  |
@@ -239,10 +240,10 @@ Com o **DinDin**, você pode:
 ## 4ª Interação – API
 | Atividade                                      | Feature               | Autor    | Revisor  |
 | ---------------------------------------------- | --------------------- | -------- | -------- |
-| Tela e função de editar transação              | **US-Auth-06_editar** | Gabriel  | Cristian |
-| Botão e função de excluir transação            | **US-Auth-06_excluir**| Vinicius | Gabriel  |
-| Correções de problemas na página de metas      | **US-Auth-07_metas**  | Cristian | Thales   |
-| Implementação de API externa (login, cadastro) | **US-Auth-08_google_auth**| Thales   | Vinicius |
+| Tela e função de editar transação              | **US-Auth-19_editar** | Gabriel  | Cristian |
+| Botão e função de excluir transação            | **US-Auth-20_excluir**| Vinicius | Gabriel  |
+| Correções de problemas na página de metas      | **US-Auth-21_metas**  | Cristian | Thales   |
+| Implementação de API externa (login, cadastro) | **US-Auth-22_google_auth**| Thales   | Vinicius |
 
 ## 5ª Interação – Perfil Usuário & Perfil Admin
 | Atividade                                            | Feature                  | Autor    | Revisor  |
