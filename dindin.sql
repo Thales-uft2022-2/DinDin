@@ -1,7 +1,4 @@
-CREATE DATABASE IF NOT EXISTS `dindin`;
-USE `dindin`;
-
--- Tabela de Usuários (principal)
+Tabela de Usuários (principal)
 CREATE TABLE `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(255) UNIQUE NOT NULL,
@@ -45,7 +42,7 @@ VALUES ('usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/a
 
 -- Atualizar transações existentes para associar ao usuário
 INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
+
+feature_login
 VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
-~
-~
-~
+VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
