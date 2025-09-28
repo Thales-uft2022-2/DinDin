@@ -25,19 +25,9 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// rota padrão -> home OU login
+// rota padrão -> home
 if ($path === '' || $path === 'home') {
-    if (isset($_SESSION['user'])) {
-        include __DIR__ . '/../app/views/home.php';
-    } else {
-        include __DIR__ . '/../app/views/auth/login.php';
-    }
-    exit;
-}
-
-// rota para login explícito
-if ($path === 'auth/login') {
-    include __DIR__ . '/../app/views/auth/login.php';
+    include __DIR__ . '/../app/views/home.php';
     exit;
 }
 
