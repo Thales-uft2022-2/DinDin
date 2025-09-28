@@ -218,6 +218,42 @@ Com o **DinDin**, você pode:
 
 | Atividade                                  | Feature                 | Autor     | Revisor   |
 |--------------------------------------------|-------------------------|-----------|-----------|
+| Tela e função de registro de usuário       | **US-Auth-06_registro** | Gabriel   | Thales  |
+| Tela e função de login                     | **US-Auth-07_login**    | Thales  | Cristian  |
+| Função de logout                           | **US-Auth-08_logout**   | Vinicius  | Gabriel      |
+| Função de recuperação de senha             | **US-Auth-09_recuperar**| Cristian    | Vinicius   |
+|
+
+## 3ª Interação – MVC
+| Atividade                                              | Feature              | Autor    | Revisor  |
+| ------------------------------------------------------ | ------------------------------- | -------- | 
+| Conexão entre páginas de Transação e Metas             | **US-TX-10_grafdashboard** |Cristian| Thales|
+| Refatoração do código do projeto                       | **US-TX-11_grafdashboard** |Thales  | Gabriel|
+| Padronização de layout (header/footer/navbar/partials) | **US-TX-12_layout_base**   |Gabriel | Vinicius|
+| Middleware de autenticação (proteção de rotas)         | **US-TX-13_auth_guard**    |Vinicius| Cristian|
+| Validações no backend + mensagens nas views            | **US-TX-14_validacao_servidor**|Cristian | Gabriel|
+| Paginação/ordenação/busca server-side na listagem      | **US-TX-15_listagem_paginada**|Thales|Vinicius|
+| ViewModels/DTOs para histórico e dashboard             | **US-TX-16_viewmodels**       |Gabriel| Thales|
+| Serviço de agregação p/ gráficos (mês/categoria)       | **US-TX-17_service_graficos** |Vinicius| Gabriel|
+| Repositório/DAO de Transações (abstração de PDO)       | **US-TX-18_repo_transacoes**  |Thales|Cristian|
+
+## 4ª Interação – API
+| Atividade                                      | Feature               | Autor    | Revisor  |
+| ---------------------------------------------- | --------------------- | -------- | -------- |
+| Tela e função de editar transação              | **US-Auth-19_editar** | Gabriel  | Cristian |
+| Botão e função de excluir transação            | **US-Auth-20_excluir**| Vinicius | Gabriel  |
+| Correções de problemas na página de metas      | **US-Auth-21_metas**  | Cristian | Thales   |
+| Implementação de API externa (login, cadastro) | **US-Auth-22_google_auth**| Thales   | Vinicius |
+
+## 5ª Interação – Perfil Usuário & Perfil Admin
+| Atividade                                            | Feature                  | Autor    | Revisor  |
+| ---------------------------------------------------- | ------------------------ | -------- | -------- |
+| Implementação de Testes Unitários                    | **teste_unitario**       | Cristian | Gabriel  |
+| Implementação de API interna (login, cadastro, etc.) | **RF008_google_auth**    | Thales   | Gabriel  |
+| Tela e função de administradores                     | **RF019_adm**            | Gabriel  | Vinicius |
+| Refatoração do código após novas features            | **RF006_editar_excluir** | Vinicius | Thales   |
+| Refatoração do código após novas features            | **RF007_grafdashboard**  | Gabriel  | Cristian |
+| Melhorias                                            | **RF007_metas**          | Thales   | Vinicius |
 | Tela e função de registro de usuário       | **US-Auth-01_registro** | Gabriel   | Thales  |
 | Tela e função de login                     | **US-Auth-02_login**    | Thales  | Cristian  |
 | Função de logout                    | **US-Auth-03_logout**   | Vinicius  | Gabriel      |

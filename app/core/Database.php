@@ -5,7 +5,6 @@ class Database {
     public static function getConnection() {
         if (!self::$instance) {
             $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-
             try {
                 self::$instance = new PDO($dsn, DB_USER, DB_PASS, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -16,5 +15,10 @@ class Database {
             }
         }
         return self::$instance;
+    }
+
+    // ✅ alias para o que o UserModel espera
+    public static function getInstance() {
+        return self::getConnection();
     }
 }
