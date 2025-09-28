@@ -254,3 +254,7 @@ Com o **DinDin**, você pode:
 | Refatoração do código após novas features            | **RF006_editar_excluir** | Vinicius | Thales   |
 | Refatoração do código após novas features            | **RF007_grafdashboard**  | Gabriel  | Cristian |
 | Melhorias                                            | **RF007_metas**          | Thales   | Vinicius |
+| Tela e função de registro de usuário       | **US-Auth-01_registro** | Gabriel   | Thales  |
+| Tela e função de login                     | **US-Auth-02_login**    | Thales  | Cristian  |
+| Função de logout                    | **US-Auth-03_logout**   | Vinicius  | Gabriel      |
+| Função de recuperação de senha             | **US-Auth-05_recuperar**| Cristian    | Vinicius   |
