@@ -1,45 +1,95 @@
- Tabela de Usuários (principal)
-CREATE TABLE `users` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `email` VARCHAR(255) UNIQUE NOT NULL,
-  `password` VARCHAR(255) NULL, -- Pode ser NULL para usuários que usam apenas Google OAuth
-  `name` VARCHAR(255) NOT NULL,
-  `avatar` VARCHAR(500) NULL, -- URL da imagem do Google ou upload
-  `provider` ENUM('email', 'google') DEFAULT 'email', -- Tipo de autenticação
-  `provider_id` VARCHAR(255) NULL, -- ID único do Google OAuth
-  `email_verified` BOOLEAN DEFAULT FALSE,
-  `verification_token` VARCHAR(100) NULL,
-  `reset_token` VARCHAR(100) NULL,
-  `reset_token_expires` DATETIME NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Tempo de geração: 28/09/2025 às 07:52
+-- Versão do servidor: 10.4.32-MariaDB
+-- Versão do PHP: 8.2.12
 
-  INDEX `idx_email` (`email`),
-  INDEX `idx_provider` (`provider`),
-  INDEX `idx_reset_token` (`reset_token`)
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Tabela de Transações (atualizada com user_id)
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Banco de dados: `dindin`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `transactions`
+--
+
 CREATE TABLE `transactions` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `type` ENUM('income', 'expense') NOT NULL,
-  `category` VARCHAR(100) NOT NULL,
-  `description` VARCHAR(255),
-  `amount` DECIMAL(10, 2) NOT NULL,
-  `date` DATE NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `id` int(11) NOT NULL,
+  `type` enum('income','expense') NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  INDEX `idx_user_id` (`user_id`),
-  INDEX `idx_date` (`date`),
-  INDEX `idx_category` (`category`)
-);
+--
+-- Despejando dados para a tabela `transactions`
+--
 
--- Inserir usuário de exemplo (senha: "senha123" hash)
-INSERT INTO `users` (`email`, `password`, `name`, `email_verified`)
-VALUES ('usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Usuário Exemplo', TRUE);
+INSERT INTO `transactions` (`id`, `type`, `category`, `description`, `amount`, `date`, `created_at`) VALUES
+(3, 'expense', 'Medica', 'Pisicologa', 550.00, '2025-09-23', '2025-09-23 00:11:18'),
+(4, 'expense', 'comida', 'supermercado', 650.00, '2025-09-23', '2025-09-23 01:16:52');
 
--- Atualizar transações existentes para associar ao usuário
-INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
-VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL,
+  `nome` varchar(150) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `senha` varchar(255) DEFAULT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
+  `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `google_id`, `foto_perfil`, `criado_em`) VALUES
+(1, 'Thales Marques Rodrigues - Computer Science', 'thalesmarques530@gmail.com', '', '112898859997771114101', 'https://lh3.googleusercontent.com/a/ACg8ocLwxhMh2opqs_gsmFE2X5-aAjisn7z7z1qmarAInx5kH3679SCMUQ=s96-c', '2025-09-28 01:23:13');
+
+--
+-- Índices para tabelas despejadas
+--
+
+--
+-- Índices de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT para tabelas despejadas
+--
+
+--
+-- AUTO_INCREMENT de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
