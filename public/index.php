@@ -20,27 +20,22 @@ spl_autoload_register(function ($class) {
 
 session_start();
 
-// 1. Rota de limpeza
+// rota simples (ex.: /transactions/create)
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// 2. Lógica de Roteamento (Define Controller e Action)
-// ROTA PADRÃO (PÁGINA INICIAL) -> REGISTRO (UserController->register)
+// rota padrão -> home
 if ($path === '' || $path === 'home') {
-    $ctrl = 'user';
-    $action = 'register';
-} else {
-    // Rota normal: /controller/action
-    [$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
+    include __DIR__ . '/../app/views/home.php';
+    exit;
 }
 
+[$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
 $controller = ucfirst($ctrl) . 'Controller';
 
-// 3. Execução do Controller
 // verifica se controller e action existem
 if (class_exists($controller) && method_exists($controller, $action)) {
-    // Cria a instância do Controller e chama o método (Action)
     (new $controller)->$action();
 } else {
     http_response_code(404);
