@@ -34,8 +34,7 @@ $message_type = isset($success) ? 'success' : (isset($error) ? 'error' : '');
         </form>
         
         <p style="text-align: center; margin-top: 20px;">
-            Já tem conta? <a href="#">Faça Login</a> (a ser implementado)
+            Já tem conta? <a href="<?= BASE_URL ?>/auth/login">Faça Login</a>
         </p>
-        
     </div>
 </div>

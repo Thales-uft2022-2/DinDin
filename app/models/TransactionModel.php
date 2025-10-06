@@ -6,18 +6,20 @@ class TransactionModel {
         $this->db = Database::getConnection();
     }
 
-    // Criar transação (já tinha, ajustado para gerar ID manual)
+    // Criar transação vinculada ao usuário
     public function create($data) {
+        // Gerar novo ID manual (se não for AUTO_INCREMENT)
         $sql = "SELECT MAX(id) as max_id FROM transactions";
         $stmt = $this->db->query($sql);
         $row = $stmt->fetch();
         $newId = ($row['max_id'] ?? 0) + 1;
 
-        $sql = "INSERT INTO transactions (id, type, category, description, amount, date) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO transactions (id, user_id, type, category, description, amount, date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            $newId, 
+            $newId,
+            $data['user_id'],   // <<< ID do usuário logado
             $data['type'],
             $data['category'],
             $data['description'],
@@ -26,14 +28,15 @@ class TransactionModel {
         ]);
     }
 
-    // Buscar todas
-    public function findAll() {
-        $sql = "SELECT * FROM transactions ORDER BY date DESC";
-        $stmt = $this->db->query($sql);
+    // Buscar todas as transações de um usuário
+    public function findAll($userId) {
+        $sql = "SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
         return $stmt->fetchAll();
     }
 
-    // Buscar por ID
+    // Buscar transação por ID (respeitando o usuário)
     public function findById($id) {
         $sql = "SELECT * FROM transactions WHERE id = ?";
         $stmt = $this->db->prepare($sql);
@@ -41,11 +44,11 @@ class TransactionModel {
         return $stmt->fetch();
     }
 
-    // Atualizar
+    // Atualizar transação
     public function update($id, $data) {
         $sql = "UPDATE transactions 
                    SET type = ?, category = ?, description = ?, amount = ?, date = ? 
-                 WHERE id = ?";
+                 WHERE id = ? AND user_id = ?";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['type'],
@@ -53,63 +56,56 @@ class TransactionModel {
             $data['description'],
             $data['amount'],
             $data['date'],
-            $id
+            $id,
+            $data['user_id']   // garante que só atualiza se for do dono
         ]);
     }
 
-    // <<< ADICIONADO: excluir transação por ID
-public function delete($id) {
-    $sql = "DELETE FROM transactions WHERE id = ?";
-    $stmt = $this->db->prepare($sql);
-    return $stmt->execute([$id]);
-}
+    // Excluir transação
+    public function delete($id) {
+        $sql = "DELETE FROM transactions WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$id]);
+    }
 
-// <<< ADICIONADO: filtragem/busca
-public function findWithFilters($filters) 
-{
-    $sql = "SELECT * FROM transactions WHERE 1=1";
-    $params = [];
-    
-    // Filtro por tipo
-    if (!empty($filters['type'])) {
-        $sql .= " AND type = ?";
-        $params[] = $filters['type'];
-    }
-    
-    // Filtro por categoria (busca parcial)
-    if (!empty($filters['category'])) {
-        $sql .= " AND category LIKE ?";
-        $params[] = '%' . $filters['category'] . '%';
-    }
-    
-    // Filtro por descrição (busca parcial)
-    if (!empty($filters['description'])) {
-        $sql .= " AND description LIKE ?";
-        $params[] = '%' . $filters['description'] . '%';
-    }
-    
-    // Filtro por período
-    if (!empty($filters['start_date'])) {
-        $sql .= " AND date >= ?";
-        $params[] = $filters['start_date'];
-    }
-    
-    if (!empty($filters['end_date'])) {
-        $sql .= " AND date <= ?";
-        $params[] = $filters['end_date'];
-    }
-    
-    $sql .= " ORDER BY date DESC";
-    
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchAll();
-}
+    // Buscar transações com filtros (somente do usuário)
+    public function findWithFilters($filters, $userId) {
+        $sql = "SELECT * FROM transactions WHERE user_id = ?";
+        $params = [$userId];
+        
+        if (!empty($filters['type'])) {
+            $sql .= " AND type = ?";
+            $params[] = $filters['type'];
+        }
+        if (!empty($filters['category'])) {
+            $sql .= " AND category LIKE ?";
+            $params[] = '%' . $filters['category'] . '%';
+        }
+        if (!empty($filters['description'])) {
+            $sql .= " AND description LIKE ?";
+            $params[] = '%' . $filters['description'] . '%';
+        }
+        if (!empty($filters['start_date'])) {
+            $sql .= " AND date >= ?";
+            $params[] = $filters['start_date'];
+        }
+        if (!empty($filters['end_date'])) {
+            $sql .= " AND date <= ?";
+            $params[] = $filters['end_date'];
+        }
 
-public function getUniqueCategories()
-{
-    $sql = "SELECT DISTINCT category FROM transactions ORDER BY category";
-    $stmt = $this->db->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
-}
+        $sql .= " ORDER BY date DESC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    // Buscar categorias únicas do usuário
+    public function getUniqueCategories($userId) {
+        $sql = "SELECT DISTINCT category FROM transactions WHERE user_id = ? ORDER BY category";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 }
