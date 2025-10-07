@@ -22,6 +22,11 @@
             <a href="<?= BASE_URL ?>/transactions/index" class="btn secondary">
                 📜 Histórico de Transações
             </a>
+
+        <!-- Barra superior com botão de logout -->
+<div style="text-align: right; padding: 15px;">
+    <a href="<?= BASE_URL ?>/auth/logout" class="btn btn-danger">Sair</a>
+</div>
         </div>
     </div>
 </div>

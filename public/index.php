@@ -7,13 +7,17 @@ spl_autoload_register(function ($class) {
         __DIR__ . '/../app/models/',
         __DIR__ . '/../app/core/'
     ];
+
     foreach ($paths as $path) {
         $file = $path . $class . '.php';
         if (file_exists($file)) { require_once $file; return; }
     }
 });
 
-session_start();
+// Inicia sessão (se não estiver ativa)
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 // Rota atual (sem a BASE_URL)
 $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
