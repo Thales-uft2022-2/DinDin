@@ -65,9 +65,8 @@ $message_type = isset($success) ? 'success' : (isset($error) ? 'error' : '');
             <button type="submit" class="btn primary" style="width: 100%; padding: 12px; font-size: 15px; border-radius: 8px;">Cadastrar</button>
         </form>
         
-        <!-- Link para login -->
-        <p style="text-align: center; margin-top: 18px; font-size: 0.9rem; color: #555;">
-            Já tem conta? <a href="<?= BASE_URL ?>/auth/login" style="color: #007BFF; font-weight: bold;">Faça Login</a>
+        <p style="text-align: center; margin-top: 20px;">
+            Já tem conta? <a href="<?= BASE_URL ?>/auth/login">Faça Login</a>
         </p>
     </div>
 </div>
