@@ -3,7 +3,7 @@ Disciplina: Engenharia de Software 2025/2
 Professor: Dr Edeilson Milhomem da Silva
 
 Grupo: DinDIn 
-Integrantes: Caio, Cristian, Gabriel Portuguez, Thales, Vinicius Fernandes.
+Integrantes: Cristian, Gabriel Portuguez, Thales, Vinicius Fernandes.
 # DinDin 💸
 
 **DinDin** é um aplicativo web simples e intuitivo para **gerenciamento de finanças pessoais e empresariais**.  
