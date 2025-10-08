@@ -69,4 +69,52 @@ class UserModel {
             return false;
         }
     }
+
+
+    /**
+     * Salva o token de redefinição de senha para um usuário.
+     * @param string $email
+     * @param string $token
+     * @param string $expires
+     * @return bool
+     */
+    public function saveResetToken(string $email, string $token, string $expires): bool {
+        $sql = "UPDATE users SET reset_token = :token, reset_token_expires = :expires WHERE email = :email";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            'token' => $token,
+            'expires' => $expires,
+            'email' => $email
+        ]);
+    }
+
+    /**
+     * Encontra um usuário por um token de redefinição válido.
+     * @param string $token
+     * @return array|null
+     */
+    public function findUserByResetToken(string $token): ?array {
+        $sql = "SELECT id, email FROM users WHERE reset_token = :token AND reset_token_expires > NOW()";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['token' => $token]);
+        $user = $stmt->fetch();
+        return $user ?: null;
+    }
+
+    /**
+     * Atualiza a senha do usuário e limpa o token de redefinição.
+     * @param int $userId
+     * @param string $newPassword
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $newPassword): bool {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $sql = "UPDATE users SET password = :password, reset_token = NULL, reset_token_expires = NULL WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            'password' => $hashedPassword,
+            'id' => $userId
+        ]);
+    }
+
 }
