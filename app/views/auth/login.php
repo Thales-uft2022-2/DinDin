@@ -70,7 +70,7 @@
 
         <div class="extra-links">
             <p>Não tem conta? <a href="<?= BASE_URL ?>/auth/register">Cadastre-se</a></p>
-            <p><a href="<?= BASE_URL ?>/auth/forgot">Esqueci minha senha</a></p>
+            <p><a href="<?= BASE_URL ?>/auth/forgot-password">Esqueci minha senha</a></p>
         </div>
     </div>
 

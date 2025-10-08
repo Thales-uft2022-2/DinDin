@@ -1,6 +1,12 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
 
+// ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+// =================================================
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../vendor/autoload.php'; 
 spl_autoload_register(function ($class) {
     $paths = [
         __DIR__ . '/../app/controllers/',
@@ -30,6 +36,12 @@ $routes = [
     'auth/login'           => ['AuthController', 'login'],
     'auth/logout'          => ['AuthController', 'logout'],
     'auth/register'        => ['AuthController', 'register'],
+
+    'auth/forgot-password'      => ['AuthController', 'forgotPassword'],      // Exibe o form
+    'auth/send-reset-link'      => ['AuthController', 'sendResetLink'],       // Processa o envio do e-mail
+    'auth/reset-password'       => ['AuthController', 'resetPassword'],       // Exibe o form de nova senha
+    'auth/update-password'      => ['AuthController', 'updatePassword'],
+
     'transactions'         => ['TransactionsController', 'index'],
     'transactions/create'  => ['TransactionsController', 'create'],
     'transactions/store'   => ['TransactionsController', 'store'],
