@@ -15,6 +15,7 @@ class Database {
                 die('Erro na conexão com o banco de dados: ' . $e->getMessage());
             }
         }
+
         return self::$instance;
     }
 }

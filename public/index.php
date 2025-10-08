@@ -1,42 +1,69 @@
 <?php
-// carrega as configs
-require_once __DIR__ . '/../config/config.php';
 
-// autoload simples para controllers, models e core
+// ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+// =================================================
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../vendor/autoload.php'; 
 spl_autoload_register(function ($class) {
     $paths = [
         __DIR__ . '/../app/controllers/',
         __DIR__ . '/../app/models/',
         __DIR__ . '/../app/core/'
     ];
+
     foreach ($paths as $path) {
         $file = $path . $class . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
+        if (file_exists($file)) { require_once $file; return; }
     }
 });
 
-session_start();
+// Inicia sessão (se não estiver ativa)
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
-// rota simples (ex.: /transactions/create)
-$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+// Rota atual (sem a BASE_URL)
+$uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// rota padrão -> home
-if ($path === '' || $path === 'home') {
-    include __DIR__ . '/../app/views/home.php';
-    exit;
+// Tabela de rotas explícitas
+$routes = [
+    'home'                 => ['HomeController', 'index'],
+    'auth/login'           => ['AuthController', 'login'],
+    'auth/logout'          => ['AuthController', 'logout'],
+    'auth/register'        => ['AuthController', 'register'],
+
+    'auth/forgot-password'      => ['AuthController', 'forgotPassword'],      // Exibe o form
+    'auth/send-reset-link'      => ['AuthController', 'sendResetLink'],       // Processa o envio do e-mail
+    'auth/reset-password'       => ['AuthController', 'resetPassword'],       // Exibe o form de nova senha
+    'auth/update-password'      => ['AuthController', 'updatePassword'],
+
+    'transactions'         => ['TransactionsController', 'index'],
+    'transactions/create'  => ['TransactionsController', 'create'],
+    'transactions/store'   => ['TransactionsController', 'store'],
+    'transactions/edit'    => ['TransactionsController', 'edit'],
+    'transactions/update'  => ['TransactionsController', 'update'],
+    'transactions/delete'  => ['TransactionsController', 'delete'],
+];
+
+// Rota padrão (somente a raiz vai para login)
+if ($path === '') {
+    [$controllerName, $action] = $routes['auth/login'];
+} elseif (isset($routes[$path])) {
+    [$controllerName, $action] = $routes[$path];
+} else {
+    // fallback dinâmico: /controller/action
+    [$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
+    $controllerName  = ucfirst($ctrl) . 'Controller';
 }
 
-[$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
-$controller = ucfirst($ctrl) . 'Controller';
-
-// verifica se controller e action existem
-if (class_exists($controller) && method_exists($controller, $action)) {
-    (new $controller)->$action();
+// Dispara a action
+if (class_exists($controllerName) && method_exists($controllerName, $action)) {
+    (new $controllerName)->$action();
 } else {
     http_response_code(404);
     echo "<h1>404 - Página não encontrada</h1>";
