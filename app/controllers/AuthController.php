@@ -169,7 +169,7 @@ class AuthController {
 
         try {
             // HABILITE O DEBUG AQUI!
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Mostra toda a comunicação com o servidor
+            //$mail->SMTPDebug = SMTP::DEBUG_SERVER; // Mostra toda a comunicação com o servidor
             $mail->CharSet = 'UTF-8'; // Garante a codificação correta para acentos
 
             // Configurações do servidor (usando as constantes do config.php)
@@ -197,7 +197,7 @@ class AuthController {
             $mail->send();
         } catch (Exception $e) {
             // Não exibir o erro para o usuário, mas pode ser útil logar
-            // error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
         }
     }
 }
