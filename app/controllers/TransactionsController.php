@@ -6,9 +6,14 @@ class TransactionsController
         $action = BASE_URL . '/transactions/store';
         $today  = date('Y-m-d');
         ?>
+        <?php include __DIR__ . '/../views/partials/header.php'; ?>
+        <script src="<?= BASE_URL ?>/js/theme-switcher.js"></script>
+
         <!-- <<< ADICIONADO: link para CSS -->
         <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
-
+        <a href="<?= BASE_URL ?>/home" class="home-logo-link">
+            <img src="<?= BASE_URL ?>/images/DinDin_Logo_Option2.jpg" alt="Voltar para a Home">
+        </a>
         <div class="form-container">
             <h1>Formulário de Nova Transação</h1>
 

@@ -6,12 +6,13 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
 </head>
 <body>
-    <h1>Lista de Transações</h1>
-    
+    <script src="<?= BASE_URL ?>/js/theme-switcher.js"></script>
+    <?php include __DIR__ . '/../partials/header.php'; ?>
+
     <!-- FORMULÁRIO DE BUSCA -->
-    <div class="search-container" id="search-container">
+    <div class="form-container">
         <h2>🔍 Filtros de Busca</h2>
-        <form method="get" action="<?= BASE_URL ?>/transactions/index">
+        <form  method="get" action="<?= BASE_URL ?>/transactions/index">
             <div class="filter-row">
                 <label>
                     Tipo:
@@ -61,8 +62,10 @@
                 </div>
             </div>
         </form>
-    </div>    
+     </div>
     <!-- CONTADOR DE RESULTADOS -->
+    <h1>Lista de Transações</h1>
+
     <div class="results-info">
         <p>Encontradas: <strong><?= count($transactions) ?></strong> transação(ões)</p>
     </div>

@@ -1,6 +1,6 @@
 <?php
 
-// ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
+// ===== DEBUG =====
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 // =================================================
@@ -48,6 +48,9 @@ $routes = [
     'transactions/edit'    => ['TransactionsController', 'edit'],
     'transactions/update'  => ['TransactionsController', 'update'],
     'transactions/delete'  => ['TransactionsController', 'delete'],
+
+    'user/profile'         => ['UserController', 'profile'], // Exibe a página
+    'user/update'          => ['UserController', 'update'],  // Processa o formulário
 ];
 
 // Rota padrão (somente a raiz vai para login)

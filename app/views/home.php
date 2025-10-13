@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
+<script src="<?= BASE_URL ?>/js/theme-switcher.js"></script>
+
+<?php include __DIR__ . '/partials/header.php'; ?>
 
 <div class="home">
     <div class="card">
@@ -9,7 +12,7 @@
 
         <!-- Título e descrição -->
         <h1>Bem-vindo ao DinDin 💰</h1>
-        <p class="description">
+        <p>
             O DinDin é um sistema simples e prático para gerenciar suas finanças pessoais.  
             Aqui você pode registrar suas receitas e despesas, e acompanhar seu histórico de transações de forma rápida.
         </p>
