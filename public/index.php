@@ -1,4 +1,5 @@
 <?php
+// public/index.php
 
 // ===== DEBUG =====
 ini_set('display_errors', 1);
@@ -32,39 +33,59 @@ $path = ltrim(substr($uri, strlen($base)), '/');
 
 // Tabela de rotas explícitas
 $routes = [
-    'home'                 => ['HomeController', 'index'],
-    'auth/login'           => ['AuthController', 'login'],
-    'auth/logout'          => ['AuthController', 'logout'],
-    'auth/register'        => ['AuthController', 'register'],
+    'home'                            => ['HomeController', 'index'],
+    'auth/login'                      => ['AuthController', 'login'],
+    'auth/logout'                     => ['AuthController', 'logout'],
+    'auth/register'                   => ['AuthController', 'register'],
 
-    'auth/forgot-password'      => ['AuthController', 'forgotPassword'],      // Exibe o form
-    'auth/send-reset-link'      => ['AuthController', 'sendResetLink'],       // Processa o envio do e-mail
-    'auth/reset-password'       => ['AuthController', 'resetPassword'],       // Exibe o form de nova senha
-    'auth/update-password'      => ['AuthController', 'updatePassword'],
+    'auth/forgot-password'            => ['AuthController', 'forgotPassword'],
+    'auth/send-reset-link'            => ['AuthController', 'sendResetLink'],
+    'auth/reset-password'             => ['AuthController', 'resetPassword'],
+    'auth/update-password'            => ['AuthController', 'updatePassword'],
 
-    'transactions'         => ['TransactionsController', 'index'],
-    'transactions/create'  => ['TransactionsController', 'create'],
-    'transactions/store'   => ['TransactionsController', 'store'],
-    'transactions/edit'    => ['TransactionsController', 'edit'],
-    'transactions/update'  => ['TransactionsController', 'update'],
-    'transactions/delete'  => ['TransactionsController', 'delete'],
-
-    'user/profile'         => ['UserController', 'profile'], // Exibe a página
-    'user/update'          => ['UserController', 'update'],  // Processa o formulário
+    'transactions'                    => ['TransactionsController', 'index'],
+    'transactions/create'             => ['TransactionsController', 'create'],
+    'transactions/store'              => ['TransactionsController', 'store'],
+    'transactions/edit'               => ['TransactionsController', 'edit'],
+    'transactions/update'             => ['TransactionsController', 'update'],
+    'transactions/delete'             => ['TransactionsController', 'delete'],
+    
+    // ROTAS DO USER CONTROLLER (US-Prof-01 e US-Prof-03)
+    'user/profile'                    => ['UserController', 'profile'],
+    'user/update'                     => ['UserController', 'update'],
+    'user/switch-accounts'            => ['UserController', 'switchAccounts'],
+    'user/confirm-switch'             => ['UserController', 'confirmSwitch'], // NOVO
+    'user/do-switch'                  => ['UserController', 'doSwitch'],       // NOVO
+    
+    // ROTAS DO ADMIN (US-Admin-01 - Vinicius)
+    'admin/login'                     => ['AdminController', 'login'],
+    'admin/authenticate'              => ['AdminController', 'authenticate'],
+    'admin/dashboard'                 => ['AdminController', 'dashboard'],
 ];
 
-// Rota padrão (somente a raiz vai para login)
+// Dispara a action
+$controllerName = '';
+$action = '';
+
+// 1. Tratamento da rota padrão e autenticação
 if ($path === '') {
-    [$controllerName, $action] = $routes['auth/login'];
-} elseif (isset($routes[$path])) {
+    if (isset($_SESSION['user']['id'])) {
+        $path = 'home';
+    } else {
+        $path = 'auth/login';
+    }
+}
+
+// 2. Procura na tabela de rotas explícitas
+if (isset($routes[$path])) {
     [$controllerName, $action] = $routes[$path];
 } else {
-    // fallback dinâmico: /controller/action
+    // 3. Fallback dinâmico: /controller/action
     [$ctrl, $action] = array_pad(explode('/', $path, 2), 2, 'index');
     $controllerName  = ucfirst($ctrl) . 'Controller';
 }
 
-// Dispara a action
+// Verifica se controller e action existem
 if (class_exists($controllerName) && method_exists($controllerName, $action)) {
     (new $controllerName)->$action();
 } else {

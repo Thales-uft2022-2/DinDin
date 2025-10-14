@@ -1,3 +1,8 @@
+<?php
+// app/views/partials/header.php
+
+$userName = $_SESSION['user']['name'] ?? '';
+?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
 
 <a href="<?= BASE_URL ?>/home" class="home-logo-link">
@@ -8,7 +13,15 @@
     
     <?php if (isset($_SESSION['user']['name'])): ?>
         <a href="<?= BASE_URL ?>/user/profile" style="color: #007bff; text-decoration: none; font-weight: bold; background-color: rgba(255,255,255,0.8); padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            👤 <?= htmlspecialchars($_SESSION['user']['name']) ?>
+            👤 <?= htmlspecialchars($userName) ?>
+        </a>
+
+        <a href="<?= BASE_URL ?>/user/switch-accounts" class="btn secondary" style="padding: 8px 12px;">
+            🔄 Trocar Conta
+        </a>
+        
+        <a href="<?= BASE_URL ?>/auth/logout" class="btn btn-danger" style="padding: 8px 12px;">
+            🔒 Sair
         </a>
     <?php endif; ?>
 
