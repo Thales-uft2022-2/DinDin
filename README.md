@@ -62,23 +62,24 @@ Com o **DinDin**, você pode:
 - **Recuperação de senha:**  
   Como usuário que esqueceu a senha, eu quero redefini-la através de um fluxo seguro para recuperar o acesso à minha conta.
 ---
-## Sprint 3: Perfil, Acessibilidade e Acessos Avançados
+## Sprint 3: Refatoração, Camada de Serviço (APIs) e Testes
 
-**Valor:** Aprimorar a experiência do usuário com personalização de perfil e acesso, e expandir as opções de autenticação, implementando a base de integrações com grandes provedores (Google e Microsoft).
+**Valor:** Aumentar a modularidade e a manutenibilidade do código, desacoplando as regras de negócio da camada de controle, preparando a aplicação para futuras integrações e garantindo a qualidade das funcionalidades através de testes automatizados.
 
 ### Tarefas:
 
-- **Personalização de Perfil:**
-  Como usuário, eu quero editar minhas informações pessoais e alterar o tema da aplicação para personalizar minha experiência.
+- **Refatoração da Gestão de Transações:**
+  Como desenvolvedor, eu quero mover a lógica de negócio das transações (cadastro, listagem, edição, exclusão) para uma camada de serviço com APIs, para desacoplar o código e facilitar os testes.
 
-- **Acessos Avançados:**
-  Como administrador, eu quero um portal de login exclusivo.
+- **Refatoração de Usuário & Autenticação:**
+  Como desenvolvedor, eu quero mover a lógica de negócio de autenticação (registro, login, logout, recuperação de senha) para uma camada de serviço com APIs, para centralizar as regras de segurança e torná-las testáveis.
 
-- **Autenticação Avançada:**
-  Como usuário, eu quero fazer login usando minhas contas do Google ou Microsoft.
+- **Implementação de Testes Unitários:**
+  Como desenvolvedor, eu quero criar testes unitários para a nova camada de serviço, para garantir a qualidade, a confiabilidade e a estabilidade das regras de negócio.
 
-- **Navegação e Contas:**
-  Como usuário, eu quero trocar de conta rapidamente e ter um acesso fácil para retornar à página inicial.
+- **Adaptação da Camada de Controle (Controllers):**
+  Como desenvolvedor, eu quero ajustar os controllers existentes para que eles consumam a nova camada de serviço, garantindo que a interface continue funcionando como esperado.
+
 ---
 ### Features
 ## 📌 Sprint 1 — Transações
@@ -217,69 +218,63 @@ Com o **DinDin**, você pode:
   **Então** vejo mensagem genérica (“Se existir, enviaremos instruções”), sem vazar existência da conta.
 
 ---
-## 📌 Sprint 3 — Perfil, Acessibilidade e Acessos Avançados
+## 📌 Sprint 3 — Refatoração, Camada de Serviço (APIs) e Testes
 
-### US-Prof-01 — Perfil e Tema (Cristian)
-**Como** usuário autenticado
-**Quero** editar minhas informações de perfil (como nome e senha) e mudar o tema da interface
-**Para** manter meus dados atualizados e personalizar minha experiência visual e acessibilidade.
-
-**Critérios de Aceite:**
-- Dado que estou na minha página de perfil,
-  Quando clico em "Editar Perfil",
-  Então vejo os campos preenchidos e posso alterá-los e salvar.
-- Dado que estou em qualquer página,
-  Quando clico no botão para alternar o tema,
-  Então a interface do sistema muda imediatamente para o tema selecionado (claro/escuro).
+### TS-Svc-01 — Criar API e Serviço para Cadastro de Transação
+**Como** desenvolvedor,
+**Quero** refatorar a lógica de cadastro de transação para uma camada de serviço exposta por uma API (`POST /api/transactions`),
+**Para** desacoplar a lógica de negócio do controller e criar testes unitários.
 
 ---
 
-### US-Prof-03 — Trocar de Conta e Navegação Rápida (Gabriel)
-**Como** usuário autenticado com múltiplas contas
-**Quero** ter uma opção para alternar facilmente entre minhas contas e um botão de retorno à home
-**Para** gerenciar diferentes perfis financeiros e navegar no sistema rapidamente.
-
-**Critérios de Aceite:**
-- Dado que estou logado no sistema,
-  Quando clico na opção "Trocar de Conta",
-  Então sou redirecionado para a seleção de contas ou diretamente para a outra conta associada.
-- Dado que estou em qualquer página interna,
-  Quando clico no logo do "DinDin" ou em um ícone de "casa",
-  Então sou imediatamente redirecionado para a página inicial (dashboard).
+### TS-Svc-02 — Criar API e Serviço para Listagem e Filtragem de Transações
+**Como** desenvolvedor,
+**Quero** refatorar a busca e filtragem de transações para uma camada de serviço exposta por uma API (`GET /api/transactions`),
+**Para** centralizar as regras de consulta e testá-las de forma isolada.
 
 ---
 
-### US-Admin-01 — Login de Administrador (Vinicius)
-**Como** administrador do sistema
-**Quero** acessar uma área de login exclusiva
-**Para** gerenciar o sistema com privilégios elevados.
-
-**Critérios de Aceite:**
-- Dado que acesso a rota `/admin/login`,
-  Quando insiro minhas credenciais de administrador válidas,
-  Então sou autenticado e redirecionado para o painel de controle administrativo.
-- Dado que insiro credenciais inválidas,
-  Quando tento fazer login,
-  Então vejo uma mensagem de erro clara.
+### TS-Svc-03 — Criar API e Serviço para Edição de Transação
+**Como** desenvolvedor,
+**Quero** refatorar a lógica de edição de transação para uma camada de serviço exposta por uma API (`PUT /api/transactions/{id}`),
+**Para** garantir que as regras de atualização sejam consistentes e testáveis.
 
 ---
 
-### US-Auth-05 — Login com APIs (Thales)
-**Como** usuário cadastrado
-**Quero** fazer login com minha conta **Google** ou **Microsoft**
-**Para** ter um acesso mais rápido e seguro, sem precisar de credenciais específicas do DinDin.
-
-**Critérios de Aceite:**
-- Dado que estou na tela de login,
-  Quando clico na opção "Entrar com Google" ou "Entrar com Microsoft",
-  Então sou redirecionado para o portal de autenticação da respectiva empresa.
-- Dado que me autentico com sucesso,
-  Quando sou redirecionado para o DinDin,
-  Então sou autenticado e vejo a página inicial.
+### TS-Svc-04 — Criar API e Serviço para Exclusão de Transação
+**Como** desenvolvedor,
+**Quero** refatorar a lógica de exclusão de transação para uma camada de serviço exposta por uma API (`DELETE /api/transactions/{id}`),
+**Para** isolar esta operação crítica e cobri-la com testes.
 
 ---
 
+### TS-Auth-01 — Criar API e Serviço para Registro de Usuário
+**Como** desenvolvedor,
+**Quero** criar uma camada de serviço e uma API (`POST /api/auth/register`) para o registro de novos usuários,
+**Para** separar as regras de criação de conta e testá-las de forma independente.
 
+---
+
+### TS-Auth-02 — Criar API e Serviço para Login
+**Como** desenvolvedor,
+**Quero** mover a lógica de autenticação (e-mail/senha e Google) para um `AuthService` e uma API (`POST /api/auth/login`),
+**Para** centralizar e testar os mecanismos de autenticação.
+
+---
+
+### TS-Auth-03 — Criar API e Serviço para Logout
+**Como** desenvolvedor,
+**Quero** gerenciar o encerramento de sessão através de um `AuthService` e uma API (`POST /api/auth/logout`),
+**Para** padronizar o processo de logout.
+
+---
+
+### TS-Auth-04 — Criar API e Serviço para Recuperação de Senha
+**Como** desenvolvedor,
+**Quero** refatorar o fluxo de recuperação de senha para um `AuthService` e APIs correspondentes,
+**Para** isolar e testar essa funcionalidade de segurança crítica.
+
+---
 # 📌 DIVISÃO DAS TAREFAS
 
 ## 1° Sprint - Gestão de Transações
@@ -304,18 +299,16 @@ Com o **DinDin**, você pode:
 | Função de recuperação de senha             | **US-Auth-05_recuperar**| Cristian    | Vinicius   |
 
 
-## 3° Sprint - Perfil, Acessibilidade e Acessos Avançados
-
-| Atividade | Feature | Autor | Revisor |
+### 3ª Sprint - Camada de Serviço, APIs e Testes
+| Atividade | Feature (História Técnica) | Autor | Revisor |
 | :--- | :--- | :--- | :--- |
-| Tela e função de **Editar Perfil** e Função de **Mudar Tema** (dark/light mode) | US-Prof-01 | **Cristian** | Gabriel |
-| Lógica de **Troca de Contas** e **Botão Home** | US-Prof-03 | **Gabriel** | Cristian |
-| Tela e função de **Login de Admin** | US-Admin-01 | **Vinicius** | Thales |
-| Implementação de login **base da API Microsoft/Google** | US-Auth-05 | **Thales** | Vinicius |
+| API e Serviço de Cadastro de Transação | TS-Svc-01 | Thales | Vinicius |
+| API e Serviço de Listar/Filtrar Transações | TS-Svc-02 | Gabriel | Cristian |
+| API e Serviço de Editar Transação | TS-Svc-03 | Vinicius | Gabriel |
+| API e Serviço de Excluir Transação | TS-Svc-04 | Cristian | Thales |
+| API e Serviço de Registro de Usuário | TS-Auth-01 | Gabriel | Vinicius |
+| API e Serviço de Login de Usuário (inclui Google) | TS-Auth-02 | Thales | Cristian |
+| API e Serviço de Logout | TS-Auth-03 | Vinicius | Gabriel |
+| API e Serviço de Recuperação de Senha | TS-Auth-04 | Cristian | Thales |
 
-
-
-
-
-
-
+---
