@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"> 
+    <meta charset="UTF-8"> [cite: 191]
     <title>Recuperar Senha - DinDin</title>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css"> 
+    <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css"> [cite: 191]
 </head>
 <body>
-    <script src="<?= BASE_URL ?>/js/theme-switcher.js"></script>
-    <?php include __DIR__ . '/../partials/header.php'; ?>
-    
     <div class="form-container">
         <h1>Recuperar Senha</h1>
         <p>Informe seu e-mail cadastrado e enviaremos um link para você redefinir sua senha.</p>

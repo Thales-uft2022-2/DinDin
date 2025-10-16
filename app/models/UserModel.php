@@ -13,7 +13,7 @@ class UserModel {
      * @return array|null Retorna os dados do usuário se encontrado, ou null.
      */
     public function findByEmail(string $email): ?array {
-        $stmt = $this->db->prepare('SELECT id, email, password, name FROM users WHERE email = :email');
+        $stmt = $this->db->prepare('SELECT id, email, password FROM users WHERE email = :email');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         
@@ -115,42 +115,6 @@ class UserModel {
             'password' => $hashedPassword,
             'id' => $userId
         ]);
-    }
-
-    /**
-     * Busca os dados de um usuário pelo seu ID.
-     * @param int $userId
-     * @return array|null
-     */
-    public function findById(int $userId): ?array {
-        $stmt = $this->db->prepare('SELECT id, name, email FROM users WHERE id = :id');
-        $stmt->execute(['id' => $userId]);
-        $user = $stmt->fetch();
-        return $user ?: null;
-    }
-
-    /**
-     * Atualiza o nome e, opcionalmente, a senha de um usuário.
-     * @param int    $userId
-     * @param string $name
-     * @param string|null $newPassword
-     * @return bool
-     */
-    public function updateProfile(int $userId, string $name, ?string $newPassword): bool {
-        $params = ['name' => $name, 'id' => $userId];
-        $sql = "UPDATE users SET name = :name";
-
-        // Se uma nova senha foi fornecida, adiciona à query
-        if (!empty($newPassword)) {
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $sql .= ", password = :password";
-            $params['password'] = $hashedPassword;
-        }
-
-        $sql .= " WHERE id = :id";
-        
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute($params);
     }
 
 }
