@@ -1,12 +1,17 @@
 <?php
+require_once __DIR__ . '/../models/TransactionModel.php';
+
 class TransactionsController
 {
+    // =========================
+    // FORMULÁRIO WEB (SEU CÓDIGO)
+    // =========================
     public function create()
     {
         $action = BASE_URL . '/transactions/store';
         $today  = date('Y-m-d');
         ?>
-        <!-- <<< ADICIONADO: link para CSS -->
+        <!-- link do CSS -->
         <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
 
         <div class="form-container">
@@ -42,16 +47,20 @@ class TransactionsController
         <?php
     }
 
+    // =========================
+    // SALVAR PELO FORMULÁRIO (SEU CÓDIGO)
+    // =========================
     public function store()
     {
-        // <<< ADICIONADO: pegar usuário logado
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
         $userId = $_SESSION['user']['id'] ?? null;
         if (!$userId) {
             die("❌ Usuário não autenticado!");
         }
 
         $data = [
-            'user_id'     => $userId,  // <<< passa o ID do usuário
+            'user_id'     => $userId,  // passa o ID do usuário
             'type'        => $_POST['type'] ?? '',
             'category'    => trim($_POST['category'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
@@ -90,36 +99,37 @@ class TransactionsController
         include __DIR__ . '/../views/transactions/message.php';
     }
 
-    // =====    PARTE DA FEATURE DE (edição) =====
-
+    // =========================
+    // LISTAGEM (SEU CÓDIGO)
+    // =========================
     public function index()
     {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
         $model = new TransactionModel();
 
-        // <<< ADICIONADO: filtrar pelo usuário logado
         $userId = $_SESSION['user']['id'] ?? null;
         if (!$userId) {
             die("❌ Usuário não autenticado!");
         }
 
-        // Capturar parâmetros de filtro
         $filters = [
-            'type'       => $_GET['type'] ?? '',
-            'category'   => $_GET['category'] ?? '',
-            'description'=> $_GET['description'] ?? '',
-            'start_date' => $_GET['start_date'] ?? '',
-            'end_date'   => $_GET['end_date'] ?? ''
+            'type'        => $_GET['type'] ?? '',
+            'category'    => $_GET['category'] ?? '',
+            'description' => $_GET['description'] ?? '',
+            'start_date'  => $_GET['start_date'] ?? '',
+            'end_date'    => $_GET['end_date'] ?? ''
         ];
 
-        // Buscar transações SOMENTE do usuário logado
         $transactions = $model->findWithFilters($filters, $userId);
-
-        // Buscar categorias únicas do usuário logado
-        $categories = $model->getUniqueCategories($userId);
+        $categories   = $model->getUniqueCategories($userId);
 
         include __DIR__ . '/../views/transactions/index.php';
     }
 
+    // =========================
+    // EDITAR (SEU CÓDIGO)
+    // =========================
     public function edit()
     {
         $id = $_GET['id'] ?? null;
@@ -139,8 +149,13 @@ class TransactionsController
         include __DIR__ . '/../views/transactions/edit.php';
     }
 
+    // =========================
+    // ATUALIZAR (SEU CÓDIGO)
+    // =========================
     public function update()
     {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
         $id = $_POST['id'] ?? null;
         if (!$id) {
             echo "<p>ID não informado.</p>";
@@ -190,7 +205,11 @@ class TransactionsController
         include __DIR__ . '/../views/transactions/message.php';
     }
 
-    public function delete() {
+    // =========================
+    // EXCLUIR (SEU CÓDIGO)
+    // =========================
+    public function delete()
+    {
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $msg  = "❌ ID não informado.";
@@ -209,5 +228,59 @@ class TransactionsController
         }
 
         include __DIR__ . '/../views/transactions/message.php';
+    }
+
+    // =========================
+    // API JSON (ACRESCENTADO) — CADASTRAR TRANSAÇÃO
+    // =========================
+    public function apiCreate()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Usuário não autenticado']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido']);
+            return;
+        }
+
+        // validação mínima
+        if (empty($data['type']) || empty($data['amount']) || empty($data['date'])) {
+            http_response_code(422);
+            echo json_encode(['error' => 'Campos obrigatórios: type, amount, date']);
+            return;
+        }
+
+        $model = new TransactionModel();
+        $ok = $model->create([
+            'user_id'     => $userId,
+            'type'        => $data['type'],
+            'category'    => $data['category'] ?? null,
+            'description' => $data['description'] ?? null,
+            'amount'      => $data['amount'],
+            'date'        => $data['date']
+        ]);
+
+        if ($ok) {
+            http_response_code(201);
+            echo json_encode(['message' => 'Transação cadastrada com sucesso!']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Erro ao cadastrar transação']);
+        }
     }
 }

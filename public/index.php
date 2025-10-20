@@ -48,6 +48,7 @@ $routes = [
     'transactions/edit'    => ['TransactionsController', 'edit'],
     'transactions/update'  => ['TransactionsController', 'update'],
     'transactions/delete'  => ['TransactionsController', 'delete'],
+    'api/transactions/create' => ['TransactionsController', 'apiCreate'],
 ];
 
 // Rota padrão (somente a raiz vai para login)
