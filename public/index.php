@@ -6,12 +6,13 @@ error_reporting(E_ALL);
 // =================================================
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../vendor/autoload.php'; 
+require_once __DIR__ . '/../vendor/autoload.php';
 spl_autoload_register(function ($class) {
     $paths = [
         __DIR__ . '/../app/controllers/',
         __DIR__ . '/../app/models/',
-        __DIR__ . '/../app/core/'
+        __DIR__ . '/../app/core/',
+        __DIR__ . '/../app/services/' // <<< LINHA ADICIONADA
     ];
 
     foreach ($paths as $path) {
@@ -32,22 +33,28 @@ $path = ltrim(substr($uri, strlen($base)), '/');
 
 // Tabela de rotas explícitas
 $routes = [
-    'home'                 => ['HomeController', 'index'],
-    'auth/login'           => ['AuthController', 'login'],
-    'auth/logout'          => ['AuthController', 'logout'],
-    'auth/register'        => ['AuthController', 'register'],
+    'home'                   => ['HomeController', 'index'],
+    'auth/login'             => ['AuthController', 'login'],
+    'auth/logout'            => ['AuthController', 'logout'],
+    'auth/register'          => ['AuthController', 'register'],
 
-    'auth/forgot-password'      => ['AuthController', 'forgotPassword'],      // Exibe o form
-    'auth/send-reset-link'      => ['AuthController', 'sendResetLink'],       // Processa o envio do e-mail
-    'auth/reset-password'       => ['AuthController', 'resetPassword'],       // Exibe o form de nova senha
-    'auth/update-password'      => ['AuthController', 'updatePassword'],
+    'auth/forgot-password'   => ['AuthController', 'forgotPassword'],
+    'auth/send-reset-link'   => ['AuthController', 'sendResetLink'],
+    'auth/reset-password'    => ['AuthController', 'resetPassword'],
+    'auth/update-password'   => ['AuthController', 'updatePassword'],
 
-    'transactions'         => ['TransactionsController', 'index'],
-    'transactions/create'  => ['TransactionsController', 'create'],
-    'transactions/store'   => ['TransactionsController', 'store'],
-    'transactions/edit'    => ['TransactionsController', 'edit'],
-    'transactions/update'  => ['TransactionsController', 'update'],
-    'transactions/delete'  => ['TransactionsController', 'delete'],
+    'transactions'           => ['TransactionsController', 'index'],
+    'transactions/create'    => ['TransactionsController', 'create'],
+    'transactions/store'     => ['TransactionsController', 'store'],
+    'transactions/edit'      => ['TransactionsController', 'edit'],
+    'transactions/update'    => ['TransactionsController', 'update'],
+    'transactions/delete'    => ['TransactionsController', 'delete'],
+    
+    // Rota da API (do Thales)
+    'api/transactions/create' => ['TransactionsController', 'apiCreate'],
+    
+    // ROTA NOVA (do Gabriel) - TS-Svc-02
+    'api/transactions'        => ['TransactionsController', 'apiIndex'], 
 ];
 
 // Rota padrão (somente a raiz vai para login)
