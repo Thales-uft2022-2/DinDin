@@ -1,3 +1,4 @@
+
 <?php
 // O autoloader (index.php) já deve estar cuidando dos 'requires'
 // Mas por garantia, podemos manter o do Model que já estava
@@ -26,21 +27,12 @@ class TransactionsController
         if (!$userId) {
             die("❌ Usuário não autenticado!");
         }
-
-        // 1. Os filtros vêm do $_GET
         $filters = $_GET;
-
-        // 2. Chamar o Serviço para buscar TODOS os dados
         $result = $this->transactionService->getTransactionsData($userId, $filters);
-
-        // 3. "Desempacotar" os dados para a View
-        // A view (index.php) espera variáveis chamadas $transactions, $categories, etc.
         $transactions = $result['transactions'];
         $categories   = $result['categories'];
-        $summary      = $result['summary']; // A view pode usar isso agora!
-        $filters      = $result['filters']; // Passa os filtros limpos para a view
-
-        // 4. Carregar a view, que agora tem acesso a todas essas variáveis
+        $summary      = $result['summary'];
+        $filters      = $result['filters'];
         include __DIR__ . '/../views/transactions/index.php';
     }
 
@@ -52,27 +44,18 @@ class TransactionsController
         header('Content-Type: application/json; charset=utf-8');
         if (session_status() === PHP_SESSION_NONE) session_start();
         $userId = $_SESSION['user']['id'] ?? null;
-
         if (!$userId) {
             http_response_code(401); // Unauthorized
             echo json_encode(['error' => 'Usuário não autenticado']);
             return;
         }
-
-        // 1. Validar o método
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             http_response_code(405); // Method Not Allowed
             echo json_encode(['error' => 'Método não permitido, use GET']);
             return;
         }
-
-        // 2. Os filtros vêm da URL (query parameters)
         $filters = $_GET;
-
-        // 3. Chamar o Serviço
         $data = $this->transactionService->getTransactionsData($userId, $filters);
-
-        // 4. Retornar os dados como JSON
         http_response_code(200); // OK
         echo json_encode($data);
     }
@@ -88,29 +71,16 @@ class TransactionsController
         if (!$userId) {
             die("❌ Usuário não autenticado!");
         }
-
-        // 1. Pegar os dados do POST
-        $data = [
-            'type'        => $_POST['type'] ?? '',
-            'category'    => $_POST['category'] ?? '',
-            'description' => $_POST['description'] ?? '',
-            'amount'      => $_POST['amount'] ?? 0,
-            'date'        => $_POST['date'] ?? '',
-        ];
-
-        // 2. Chamar o Serviço
+        $data = $_POST; // O Serviço já lida com os campos esperados
         $result = $this->transactionService->createTransaction($data, $userId);
 
-        // 3. Mostrar a resposta (HTML)
         if ($result['success']) {
             $msg  = "✅ " . $result['message'];
             $type = "success";
         } else {
-            // Se falhar, mostra os erros
             $msg  = "❌ Erro ao salvar:<br>" . implode('<br>', $result['errors']);
             $type = "error";
         }
-
         include __DIR__ . '/../views/transactions/message.php';
     }
 
@@ -123,20 +93,95 @@ class TransactionsController
         header('Content-Type: application/json; charset=utf-8');
         if (session_status() === PHP_SESSION_NONE) session_start();
         $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Usuário não autenticado']);
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido, use POST']);
+            return;
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido']);
+            return;
+        }
+        $result = $this->transactionService->createTransaction($data, $userId);
+        if ($result['success']) {
+            http_response_code(201);
+            echo json_encode(['message' => $result['message']]);
+        } else {
+            http_response_code(422);
+            echo json_encode(['errors' => $result['errors']]);
+        }
+    }
 
+    // =======================================================
+    // MÉTODO 'update' (WEB) - REFATORADO (TS-Svc-03)
+    // =======================================================
+    public function update()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            die("❌ Usuário não autenticado!");
+        }
+
+        // 1. Pegar dados do POST
+        $transactionId = (int) ($_POST['id'] ?? 0);
+        $data = $_POST; // O Serviço vai extrair o que precisa
+
+        if (!$transactionId) {
+            echo "<p>ID não informado.</p>"; // Poderia ser uma view de erro
+            return;
+        }
+        
+        // 2. Chamar o Serviço
+        $result = $this->transactionService->updateTransaction($transactionId, $userId, $data);
+
+        // 3. Tratar a resposta
+        if ($result['success']) {
+            $msg = "✅ " . $result['message'];
+            include __DIR__ . '/../views/transactions/message.php';
+        } else {
+            // Se falhar, mostra os erros (assim como o código antigo fazia)
+            include_once __DIR__ . '/../views/_header.php';
+            echo '<div class="form-container">';
+            echo '<h1>❌ Erro ao atualizar</h1>';
+            foreach ($result['errors'] as $e) {
+                echo '<p style="color:red;">' . htmlspecialchars($e) . '</p>';
+            }
+            echo '<p><a href="' . BASE_URL . '/transactions/edit?id=' . $transactionId . '">Voltar para a edição</a></p>';
+            echo '</div>';
+            include_once __DIR__ . '/../views/_footer.php';
+        }
+    }
+
+    // =======================================================
+    // MÉTODO 'apiUpdate' (API) - NOVO (TS-Svc-03)
+    // =======================================================
+    public function apiUpdate()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user']['id'] ?? null;
         if (!$userId) {
             http_response_code(401); // Unauthorized
             echo json_encode(['error' => 'Usuário não autenticado']);
             return;
         }
 
+        // 1. Validar Método
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405); // Method Not Allowed
             echo json_encode(['error' => 'Método não permitido, use POST']);
             return;
         }
 
-        // 1. Pegar os dados do JSON
+        // 2. Pegar dados do JSON
         $data = json_decode(file_get_contents('php://input'), true);
         if (!is_array($data)) {
             http_response_code(400); // Bad Request
@@ -144,33 +189,35 @@ class TransactionsController
             return;
         }
 
-        // 2. Chamar o Serviço
-        $result = $this->transactionService->createTransaction($data, $userId);
+        // 3. Pegar o ID da transação
+        $transactionId = (int) ($data['id'] ?? 0);
+        if (!$transactionId) {
+            http_response_code(400); // Bad Request
+            echo json_encode(['error' => 'O campo "id" da transação é obrigatório.']);
+            return;
+        }
 
-        // 3. Mostrar a resposta (JSON)
+        // 4. Chamar o Serviço
+        $result = $this->transactionService->updateTransaction($transactionId, $userId, $data);
+
+        // 5. Retornar a resposta JSON
+        http_response_code($result['status_code']); // Usa o código (200, 403, 404, 422) vindo do serviço
         if ($result['success']) {
-            http_response_code(201); // Created
             echo json_encode(['message' => $result['message']]);
         } else {
-            http_response_code(422); // Unprocessable Entity (Erro de validação)
             echo json_encode(['errors' => $result['errors']]);
         }
     }
 
-
     // =======================================================
-    // MÉTODO 'create' (FORMULÁRIO WEB) - ATUALIZADO COM HEADER/FOOTER
+    // MÉTODOS VISUAIS (create, edit)
     // =======================================================
     public function create()
     {
-        // 1. INCLUI O NOVO HEADER
         include_once __DIR__ . '/../views/_header.php'; 
-
-        // 2. O HTML do formulário
         $action = BASE_URL . '/transactions/store';
         $today  = date('Y-m-d');
         ?>
-        
         <div class="form-container">
             <h1>Formulário de Nova Transação</h1>
             <form method="post" action="<?= htmlspecialchars($action) ?>">
@@ -195,21 +242,13 @@ class TransactionsController
                 <button type="submit">Salvar</button>
             </form>
         </div>
-        
         <?php
-        // 3. INCLUI O NOVO FOOTER
         include_once __DIR__ . '/../views/_footer.php'; 
     }
 
-    // =======================================================
-    // MÉTODOS ANTIGOS (edit, update, delete)
-    // =======================================================
-
     public function edit()
     {
-        // NOTA: Esta página também deveria incluir o header/footer
         include_once __DIR__ . '/../views/_header.php';
-
         $id = $_GET['id'] ?? null;
         if (!$id) {
             echo "<p>ID não informado.</p>";
@@ -222,66 +261,27 @@ class TransactionsController
             include_once __DIR__ . '/../views/_footer.php';
             return;
         }
+        
+        // Garante que o usuário só pode editar sua própria transação
+        $userId = $_SESSION['user']['id'] ?? null;
+        if ($transaction['user_id'] != $userId) {
+            echo "<h1>Acesso Negado</h1><p>Você não tem permissão para editar esta transação.</p>";
+            include_once __DIR__ . '/../views/_footer.php';
+            return;
+        }
 
-        // O arquivo edit.php precisa existir e também não deve conter <html>, <body>, etc.
+        // O arquivo edit.php precisa existir e não deve conter <html>, <body>
         include __DIR__ . '/../views/transactions/edit.php'; 
         
         include_once __DIR__ . '/../views/_footer.php';
     }
 
-    public function update()
-    {
-        // ... (Este será o próximo a ser refatorado) ...
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        $id = $_POST['id'] ?? null;
-        if (!$id) {
-            echo "<p>ID não informado.</p>";
-            return;
-        }
-        $userId = $_SESSION['user']['id'] ?? null;
-        if (!$userId) {
-            die("❌ Usuário não autenticado!");
-        }
-        $data = [
-            'user_id'     => $userId,
-            'type'        => $_POST['type'] ?? '',
-            'category'    => trim($_POST['category'] ?? ''),
-            'description' => trim($_POST['description'] ?? ''),
-            'amount'      => (float) ($_POST['amount'] ?? 0),
-            'date'        => $_POST['date'] ?: date('Y-m-d'),
-        ];
-        $errors = [];
-        if (!in_array($data['type'], ['income', 'expense'], true)) {
-            $errors[] = 'Tipo inválido';
-        }
-        if ($data['amount'] <= 0) {
-            $errors[] = 'Valor deve ser maior que zero';
-        }
-        if ($data['category'] === '') {
-            $errors[] = 'Categoria é obrigatória';
-        }
-        if ($errors) {
-            // NOTA: Esta resposta de erro também deveria usar a view de header/footer
-            include_once __DIR__ . '/../views/_header.php';
-            foreach ($errors as $e) {
-                echo '<p style="color:red;">' . htmlspecialchars($e) . '</p>';
-            }
-            echo '<p><a href="' . BASE_URL . '/transactions/edit?id=' . $id . '">Voltar</a></p>';
-            include_once __DIR__ . '/../views/_footer.php';
-            return;
-        }
-        
-        if ($this->transactionModel->update($id, $data)) {
-            $msg = "✅ Transação atualizada com sucesso!";
-        } else {
-            $msg = "❌ Erro ao atualizar transação.";
-        }
-        include __DIR__ . '/../views/transactions/message.php';
-    }
-
+    // =======================================================
+    // MÉTODO DELETE (Ainda não refatorado)
+    // =======================================================
     public function delete()
     {
-        // ... (Este também será refatorado) ...
+        // ... (Este será o próximo a ser refatorado) ...
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $msg  = "❌ ID não informado.";

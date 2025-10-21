@@ -1,3 +1,4 @@
+
 <?php
 
 // ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
@@ -31,7 +32,7 @@ $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas (COM AS DUAS ROTAS DE API)
+// Tabela de rotas explícitas (COM AS TRÊS ROTAS DE API)
 $routes = [
     'home'                   => ['HomeController', 'index'],
     'auth/login'             => ['AuthController', 'login'],
@@ -54,7 +55,10 @@ $routes = [
     'api/transactions/create' => ['TransactionsController', 'apiCreate'],
     
     // Rota da API (do Gabriel) - TS-Svc-02
-    'api/transactions'        => ['TransactionsController', 'apiIndex'], 
+    'api/transactions'        => ['TransactionsController', 'apiIndex'],
+    
+    // ROTA NOVA (do Vinicius) - TS-Svc-03
+    'api/transactions/update' => ['TransactionsController', 'apiUpdate'],
 ];
 
 // Rota padrão (somente a raiz vai para login)
