@@ -12,7 +12,7 @@ spl_autoload_register(function ($class) {
         __DIR__ . '/../app/controllers/',
         __DIR__ . '/../app/models/',
         __DIR__ . '/../app/core/',
-        __DIR__ . '/../app/services/' // <<< LINHA ADICIONADA
+        __DIR__ . '/../app/services/' // Garante que o autoloader do Service está aqui
     ];
 
     foreach ($paths as $path) {
@@ -31,7 +31,7 @@ $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas
+// Tabela de rotas explícitas (COM AS DUAS ROTAS DE API)
 $routes = [
     'home'                   => ['HomeController', 'index'],
     'auth/login'             => ['AuthController', 'login'],
@@ -50,10 +50,10 @@ $routes = [
     'transactions/update'    => ['TransactionsController', 'update'],
     'transactions/delete'    => ['TransactionsController', 'delete'],
     
-    // Rota da API (do Thales)
+    // Rota da API (do Thales) - TS-Svc-01
     'api/transactions/create' => ['TransactionsController', 'apiCreate'],
     
-    // ROTA NOVA (do Gabriel) - TS-Svc-02
+    // Rota da API (do Gabriel) - TS-Svc-02
     'api/transactions'        => ['TransactionsController', 'apiIndex'], 
 ];
 

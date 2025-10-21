@@ -203,7 +203,6 @@ class TransactionsController
 
     // =======================================================
     // MÉTODOS ANTIGOS (edit, update, delete)
-    // Eles ainda NÃO foram refatorados, mas continuam funcionando.
     // =======================================================
 
     public function edit()
