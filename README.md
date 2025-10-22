@@ -3,7 +3,7 @@ Disciplina: Engenharia de Software 2025/2
 Professor: Dr Edeilson Milhomem da Silva
 
 Grupo: DinDIn 
-Integrantes: Caio, Cristian, Gabriel Portuguez, Thales, Vinicius Fernandes.
+Integrantes: Cristian, Gabriel Portuguez, Thales, Vinicius Fernandes.
 # DinDin 💸
 
 **DinDin** é um aplicativo web simples e intuitivo para **gerenciamento de finanças pessoais e empresariais**.  
@@ -61,6 +61,24 @@ Com o **DinDin**, você pode:
 
 - **Recuperação de senha:**  
   Como usuário que esqueceu a senha, eu quero redefini-la através de um fluxo seguro para recuperar o acesso à minha conta.
+---
+## Sprint 3: Perfil, Acessibilidade e Acessos Avançados
+
+**Valor:** Aprimorar a experiência do usuário com personalização de perfil e acesso, e expandir as opções de autenticação, implementando a base de integrações com grandes provedores (Google e Microsoft).
+
+### Tarefas:
+
+- **Personalização de Perfil:**
+  Como usuário, eu quero editar minhas informações pessoais e alterar o tema da aplicação para personalizar minha experiência.
+
+- **Acessos Avançados:**
+  Como administrador, eu quero um portal de login exclusivo.
+
+- **Autenticação Avançada:**
+  Como usuário, eu quero fazer login usando minhas contas do Google ou Microsoft.
+
+- **Navegação e Contas:**
+  Como usuário, eu quero trocar de conta rapidamente e ter um acesso fácil para retornar à página inicial.
 ---
 ### Features
 ## 📌 Sprint 1 — Transações
@@ -199,6 +217,68 @@ Com o **DinDin**, você pode:
   **Então** vejo mensagem genérica (“Se existir, enviaremos instruções”), sem vazar existência da conta.
 
 ---
+## 📌 Sprint 3 — Perfil, Acessibilidade e Acessos Avançados
+
+### US-Prof-01 — Perfil e Tema (Cristian)
+**Como** usuário autenticado
+**Quero** editar minhas informações de perfil (como nome e senha) e mudar o tema da interface
+**Para** manter meus dados atualizados e personalizar minha experiência visual e acessibilidade.
+
+**Critérios de Aceite:**
+- Dado que estou na minha página de perfil,
+  Quando clico em "Editar Perfil",
+  Então vejo os campos preenchidos e posso alterá-los e salvar.
+- Dado que estou em qualquer página,
+  Quando clico no botão para alternar o tema,
+  Então a interface do sistema muda imediatamente para o tema selecionado (claro/escuro).
+
+---
+
+### US-Prof-03 — Trocar de Conta e Navegação Rápida (Gabriel)
+**Como** usuário autenticado com múltiplas contas
+**Quero** ter uma opção para alternar facilmente entre minhas contas e um botão de retorno à home
+**Para** gerenciar diferentes perfis financeiros e navegar no sistema rapidamente.
+
+**Critérios de Aceite:**
+- Dado que estou logado no sistema,
+  Quando clico na opção "Trocar de Conta",
+  Então sou redirecionado para a seleção de contas ou diretamente para a outra conta associada.
+- Dado que estou em qualquer página interna,
+  Quando clico no logo do "DinDin" ou em um ícone de "casa",
+  Então sou imediatamente redirecionado para a página inicial (dashboard).
+
+---
+
+### US-Admin-01 — Login de Administrador (Vinicius)
+**Como** administrador do sistema
+**Quero** acessar uma área de login exclusiva
+**Para** gerenciar o sistema com privilégios elevados.
+
+**Critérios de Aceite:**
+- Dado que acesso a rota `/admin/login`,
+  Quando insiro minhas credenciais de administrador válidas,
+  Então sou autenticado e redirecionado para o painel de controle administrativo.
+- Dado que insiro credenciais inválidas,
+  Quando tento fazer login,
+  Então vejo uma mensagem de erro clara.
+
+---
+
+### US-Auth-05 — Login com APIs (Thales)
+**Como** usuário cadastrado
+**Quero** fazer login com minha conta **Google** ou **Microsoft**
+**Para** ter um acesso mais rápido e seguro, sem precisar de credenciais específicas do DinDin.
+
+**Critérios de Aceite:**
+- Dado que estou na tela de login,
+  Quando clico na opção "Entrar com Google" ou "Entrar com Microsoft",
+  Então sou redirecionado para o portal de autenticação da respectiva empresa.
+- Dado que me autentico com sucesso,
+  Quando sou redirecionado para o DinDin,
+  Então sou autenticado e vejo a página inicial.
+
+---
+
 
 # 📌 DIVISÃO DAS TAREFAS
 
@@ -222,3 +302,20 @@ Com o **DinDin**, você pode:
 | Tela e função de login                     | **US-Auth-02_login**    | Thales  | Cristian  |
 | Função de logout                    | **US-Auth-03_logout**   | Vinicius  | Gabriel      |
 | Função de recuperação de senha             | **US-Auth-05_recuperar**| Cristian    | Vinicius   |
+
+
+## 3° Sprint - Perfil, Acessibilidade e Acessos Avançados
+
+| Atividade | Feature | Autor | Revisor |
+| :--- | :--- | :--- | :--- |
+| Tela e função de **Editar Perfil** e Função de **Mudar Tema** (dark/light mode) | US-Prof-01 | **Cristian** | Gabriel |
+| Lógica de **Troca de Contas** e **Botão Home** | US-Prof-03 | **Gabriel** | Cristian |
+| Tela e função de **Login de Admin** | US-Admin-01 | **Vinicius** | Thales |
+| Implementação de login **base da API Microsoft/Google** | US-Auth-05 | **Thales** | Vinicius |
+
+
+
+
+
+
+
