@@ -1,4 +1,3 @@
-
 <?php
 // O autoloader (index.php) já deve estar cuidando dos 'requires'
 // Mas por garantia, podemos manter o do Model que já estava
@@ -14,7 +13,7 @@ class TransactionsController
     {
         // O Controller agora usa o Serviço
         $this->transactionService = new TransactionService();
-        $this->transactionModel = new TransactionModel(); // Necessário para edit, update, delete
+        $this->transactionModel = new TransactionModel(); // Necessário para edit
     }
 
     // =======================================================
@@ -138,7 +137,7 @@ class TransactionsController
             echo "<p>ID não informado.</p>"; // Poderia ser uma view de erro
             return;
         }
-        
+
         // 2. Chamar o Serviço
         $result = $this->transactionService->updateTransaction($transactionId, $userId, $data);
 
@@ -210,11 +209,94 @@ class TransactionsController
     }
 
     // =======================================================
+    // MÉTODO 'delete' (WEB) - REFATORADO (TS-Svc-04)
+    // =======================================================
+    public function delete()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            die("❌ Usuário não autenticado!");
+        }
+
+        // 1. Pegar ID do GET
+        $transactionId = (int) ($_GET['id'] ?? 0);
+        if (!$transactionId) {
+            $msg  = "❌ ID não informado.";
+            $type = "error";
+            include __DIR__ . '/../views/transactions/message.php';
+            return;
+        }
+
+        // 2. Chamar o Serviço (que tem a lógica de segurança)
+        $result = $this->transactionService->deleteTransaction($transactionId, $userId);
+
+        // 3. Mostrar o resultado
+        if ($result['success']) {
+            $msg  = "✅ " . $result['message'];
+            $type = "success";
+        } else {
+            $msg  = "❌ Erro ao excluir: " . implode(', ', $result['errors']);
+            $type = "error";
+        }
+        include __DIR__ . '/../views/transactions/message.php';
+    }
+
+    // =======================================================
+    // MÉTODO 'apiDelete' (API) - NOVO (TS-Svc-04)
+    // =======================================================
+    public function apiDelete()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(['error' => 'Usuário não autenticado']);
+            return;
+        }
+
+        // 1. Validar Método
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405); // Method Not Allowed
+            echo json_encode(['error' => 'Método não permitido, use POST']);
+            return;
+        }
+
+        // 2. Pegar dados do JSON
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data)) {
+            http_response_code(400); // Bad Request
+            echo json_encode(['error' => 'JSON inválido']);
+            return;
+        }
+
+        // 3. Pegar o ID da transação
+        $transactionId = (int) ($data['id'] ?? 0);
+        if (!$transactionId) {
+            http_response_code(400); // Bad Request
+            echo json_encode(['error' => 'O campo "id" da transação é obrigatório.']);
+            return;
+        }
+
+        // 4. Chamar o Serviço
+        $result = $this->transactionService->deleteTransaction($transactionId, $userId);
+
+        // 5. Retornar a resposta JSON
+        http_response_code($result['status_code']);
+        if ($result['success']) {
+            echo json_encode(['message' => $result['message']]);
+        } else {
+            echo json_encode(['errors' => $result['errors']]);
+        }
+    }
+
+    // =======================================================
     // MÉTODOS VISUAIS (create, edit)
     // =======================================================
     public function create()
     {
-        include_once __DIR__ . '/../views/_header.php'; 
+        include_once __DIR__ . '/../views/_header.php';
         $action = BASE_URL . '/transactions/store';
         $today  = date('Y-m-d');
         ?>
@@ -243,7 +325,7 @@ class TransactionsController
             </form>
         </div>
         <?php
-        include_once __DIR__ . '/../views/_footer.php'; 
+        include_once __DIR__ . '/../views/_footer.php';
     }
 
     public function edit()
@@ -261,7 +343,7 @@ class TransactionsController
             include_once __DIR__ . '/../views/_footer.php';
             return;
         }
-        
+
         // Garante que o usuário só pode editar sua própria transação
         $userId = $_SESSION['user']['id'] ?? null;
         if ($transaction['user_id'] != $userId) {
@@ -271,31 +353,8 @@ class TransactionsController
         }
 
         // O arquivo edit.php precisa existir e não deve conter <html>, <body>
-        include __DIR__ . '/../views/transactions/edit.php'; 
-        
-        include_once __DIR__ . '/../views/_footer.php';
-    }
+        include __DIR__ . '/../views/transactions/edit.php';
 
-    // =======================================================
-    // MÉTODO DELETE (Ainda não refatorado)
-    // =======================================================
-    public function delete()
-    {
-        // ... (Este será o próximo a ser refatorado) ...
-        $id = $_GET['id'] ?? null;
-        if (!$id) {
-            $msg  = "❌ ID não informado.";
-            $type = "error";
-            include __DIR__ . '/../views/transactions/message.php';
-            return;
-        }
-        if ($this->transactionModel->delete($id)) {
-            $msg  = "✅ Transação excluída com sucesso!";
-            $type = "success";
-        } else {
-            $msg  = "❌ Erro ao excluir transação.";
-            $type = "error";
-        }
-        include __DIR__ . '/../views/transactions/message.php';
+        include_once __DIR__ . '/../views/_footer.php';
     }
 }

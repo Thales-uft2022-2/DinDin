@@ -1,4 +1,3 @@
-
 <?php
 
 class TransactionService
@@ -45,7 +44,7 @@ class TransactionService
         if (empty($validatedData['category'])) {
             $errors[] = 'Categoria é obrigatória.';
         }
-        
+
         // Validação da data (simples)
         $d = DateTime::createFromFormat('Y-m-d', $validatedData['date']);
         if (!$d || $d->format('Y-m-d') !== $validatedData['date']) {
@@ -91,7 +90,7 @@ class TransactionService
         // 3. Calcular o resumo
         $totalIncome  = 0;
         $totalExpense = 0;
-        
+
         // Vamos calcular o resumo com base nas transações *filtradas*
         foreach ($transactions as $tx) {
             if ($tx['type'] == 'income') {
@@ -100,7 +99,7 @@ class TransactionService
                 $totalExpense += $tx['amount'];
             }
         }
-        
+
         $balance = $totalIncome - $totalExpense;
 
         // 4. Retornar um pacote de dados completo
@@ -118,7 +117,7 @@ class TransactionService
 
     /**
      * Valida e ATUALIZA uma transação existente.
-     * (MÉTODO NOVO - TS-Svc-03)
+     * (TS-Svc-03)
      *
      * @param int $transactionId ID da transação a ser atualizada
      * @param int $userId ID do usuário autenticado (para segurança)
@@ -172,6 +171,35 @@ class TransactionService
             return ['success' => true, 'message' => 'Transação atualizada com sucesso!', 'status_code' => 200]; // 200 OK
         } else {
             return ['success' => false, 'errors' => ['Erro desconhecido ao atualizar no banco.'], 'status_code' => 500]; // 500 Internal Server Error
+        }
+    }
+
+    /**
+     * Valida e EXCLUI uma transação existente.
+     * (TS-Svc-04)
+     *
+     * @param int $transactionId ID da transação a ser excluída
+     * @param int $userId ID do usuário autenticado (para segurança)
+     * @return array ['success' => bool, 'errors' => array, 'message' => string, 'status_code' => int]
+     */
+    public function deleteTransaction(int $transactionId, int $userId): array
+    {
+        // 1. Verificar se a transação existe e se pertence ao usuário (VERIFICAÇÃO DE SEGURANÇA)
+        $transaction = $this->transactionModel->findById($transactionId);
+
+        if (!$transaction) {
+            return ['success' => false, 'errors' => ['Transação não encontrada.'], 'status_code' => 404]; // 404 Not Found
+        }
+
+        if ($transaction['user_id'] != $userId) {
+            return ['success' => false, 'errors' => ['Acesso negado. Você não pode excluir esta transação.'], 'status_code' => 403]; // 403 Forbidden
+        }
+
+        // 2. Chamar o Model para excluir
+        if ($this->transactionModel->delete($transactionId)) {
+            return ['success' => true, 'message' => 'Transação excluída com sucesso!', 'status_code' => 200]; // 200 OK
+        } else {
+            return ['success' => false, 'errors' => ['Erro desconhecido ao excluir do banco.'], 'status_code' => 500]; // 500 Internal Server Error
         }
     }
 }
