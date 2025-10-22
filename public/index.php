@@ -1,3 +1,4 @@
+
 <?php
 
 // ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====

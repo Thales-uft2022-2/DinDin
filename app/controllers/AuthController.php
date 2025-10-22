@@ -1,3 +1,4 @@
+
 <?php
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -72,6 +73,7 @@ class AuthController {
     // =======================================================
     public function login() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        // Se já estiver logado (sessão ativa), redireciona para home
         if (!empty($_SESSION['user'])) {
             header("Location: " . BASE_URL . "/home");
             exit;
