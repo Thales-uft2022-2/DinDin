@@ -1,4 +1,3 @@
-
 <?php
 
 class TransactionService
@@ -118,7 +117,7 @@ class TransactionService
 
     /**
      * Valida e ATUALIZA uma transação existente.
-     * (MÉTODO NOVO - TS-Svc-03)
+     * (TS-Svc-03)
      *
      * @param int $transactionId ID da transação a ser atualizada
      * @param int $userId ID do usuário autenticado (para segurança)
@@ -172,6 +171,35 @@ class TransactionService
             return ['success' => true, 'message' => 'Transação atualizada com sucesso!', 'status_code' => 200]; // 200 OK
         } else {
             return ['success' => false, 'errors' => ['Erro desconhecido ao atualizar no banco.'], 'status_code' => 500]; // 500 Internal Server Error
+        }
+    }
+
+    /**
+     * Valida e EXCLUI uma transação existente.
+     * (MÉTODO NOVO - TS-Svc-04)
+     *
+     * @param int $transactionId ID da transação a ser excluída
+     * @param int $userId ID do usuário autenticado (para segurança)
+     * @return array ['success' => bool, 'errors' => array, 'message' => string, 'status_code' => int]
+     */
+    public function deleteTransaction(int $transactionId, int $userId): array
+    {
+        // 1. Verificar se a transação existe e se pertence ao usuário (VERIFICAÇÃO DE SEGURANÇA)
+        $transaction = $this->transactionModel->findById($transactionId);
+
+        if (!$transaction) {
+            return ['success' => false, 'errors' => ['Transação não encontrada.'], 'status_code' => 404]; // 404 Not Found
+        }
+
+        if ($transaction['user_id'] != $userId) {
+            return ['success' => false, 'errors' => ['Acesso negado. Você não pode excluir esta transação.'], 'status_code' => 403]; // 403 Forbidden
+        }
+
+        // 2. Chamar o Model para excluir
+        if ($this->transactionModel->delete($transactionId)) {
+            return ['success' => true, 'message' => 'Transação excluída com sucesso!', 'status_code' => 200]; // 200 OK
+        } else {
+            return ['success' => false, 'errors' => ['Erro desconhecido ao excluir do banco.'], 'status_code' => 500]; // 500 Internal Server Error
         }
     }
 }
