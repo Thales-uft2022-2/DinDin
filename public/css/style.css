@@ -372,3 +372,41 @@ datalist {
   text-align: center;
   transition: all 0.3
 }
+/* --- CSS para o Logo/Botão Home --- */
+
+.logo-header-link {
+    /* Posicionamento */
+    position: fixed; /* Fica fixo no canto da tela */
+    top: 25px;       /* 25px do topo */
+    left: 25px;      /* 25px da esquerda */
+    z-index: 1000;   /* Garante que fique na frente de tudo */
+    
+    /* Visual */
+    display: block;
+    padding: 10px; /* Um espaçamento interno */
+    background-color: #fff;
+    border-radius: 16px; /* Bordas arredondadas */
+    
+    /* --- Efeito 3D (Sombra) --- */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    
+    /* Animação suave */
+    transition: all 0.2s ease-in-out;
+}
+
+.logo-header-image {
+    width: 150px; /* Ajuste o tamanho do logo aqui */
+    height: auto;
+    display: block; /* Remove qualquer espaço extra */
+}
+
+/* --- Efeito 3D ao passar o mouse --- */
+.logo-header-link:hover {
+    transform: translateY(-5px) scale(1.03); /* Levanta o botão */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
+}
+
+/* Empurra o conteúdo da página para baixo, para não ficar atrás do logo */
+body {
+    padding-top: 150px; /* Ajuste esse valor se o seu logo for maior */
+}
