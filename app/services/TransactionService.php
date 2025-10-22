@@ -44,7 +44,7 @@ class TransactionService
         if (empty($validatedData['category'])) {
             $errors[] = 'Categoria é obrigatória.';
         }
-        
+
         // Validação da data (simples)
         $d = DateTime::createFromFormat('Y-m-d', $validatedData['date']);
         if (!$d || $d->format('Y-m-d') !== $validatedData['date']) {
@@ -90,7 +90,7 @@ class TransactionService
         // 3. Calcular o resumo
         $totalIncome  = 0;
         $totalExpense = 0;
-        
+
         // Vamos calcular o resumo com base nas transações *filtradas*
         foreach ($transactions as $tx) {
             if ($tx['type'] == 'income') {
@@ -99,7 +99,7 @@ class TransactionService
                 $totalExpense += $tx['amount'];
             }
         }
-        
+
         $balance = $totalIncome - $totalExpense;
 
         // 4. Retornar um pacote de dados completo
@@ -176,7 +176,6 @@ class TransactionService
 
     /**
      * Valida e EXCLUI uma transação existente.
-     * (MÉTODO NOVO - TS-Svc-04)
      *
      * @param int $transactionId ID da transação a ser excluída
      * @param int $userId ID do usuário autenticado (para segurança)
@@ -202,4 +201,8 @@ class TransactionService
             return ['success' => false, 'errors' => ['Erro desconhecido ao excluir do banco.'], 'status_code' => 500]; // 500 Internal Server Error
         }
     }
+
 }
+
+
+

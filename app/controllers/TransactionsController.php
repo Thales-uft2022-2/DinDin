@@ -137,7 +137,7 @@ class TransactionsController
             echo "<p>ID não informado.</p>"; // Poderia ser uma view de erro
             return;
         }
-        
+
         // 2. Chamar o Serviço
         $result = $this->transactionService->updateTransaction($transactionId, $userId, $data);
 
@@ -227,7 +227,6 @@ class TransactionsController
             include __DIR__ . '/../views/transactions/message.php';
             return;
         }
-        
         // 2. Chamar o Serviço (que tem a lógica de segurança)
         $result = $this->transactionService->deleteTransaction($transactionId, $userId);
 
@@ -296,7 +295,7 @@ class TransactionsController
     // =======================================================
     public function create()
     {
-        include_once __DIR__ . '/../views/_header.php'; 
+        include_once __DIR__ . '/../views/_header.php';
         $action = BASE_URL . '/transactions/store';
         $today  = date('Y-m-d');
         ?>
@@ -325,7 +324,7 @@ class TransactionsController
             </form>
         </div>
         <?php
-        include_once __DIR__ . '/../views/_footer.php'; 
+        include_once __DIR__ . '/../views/_footer.php';
     }
 
     public function edit()
@@ -343,7 +342,7 @@ class TransactionsController
             include_once __DIR__ . '/../views/_footer.php';
             return;
         }
-        
+
         // Garante que o usuário só pode editar sua própria transação
         $userId = $_SESSION['user']['id'] ?? null;
         if ($transaction['user_id'] != $userId) {
@@ -353,8 +352,9 @@ class TransactionsController
         }
 
         // O arquivo edit.php precisa existir e não deve conter <html>, <body>
-        include __DIR__ . '/../views/transactions/edit.php'; 
-        
+        include __DIR__ . '/../views/transactions/edit.php';
+
         include_once __DIR__ . '/../views/_footer.php';
     }
+
 }

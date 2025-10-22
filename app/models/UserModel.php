@@ -13,13 +13,13 @@ class UserModel {
      * @return array|null Retorna os dados do usuário se encontrado, ou null.
      */
     public function findByEmail(string $email): ?array {
-        $stmt = $this->db->prepare('SELECT id, email, password FROM users WHERE email = :email');
+        $stmt = $this->db->prepare('SELECT id, email, password, name FROM users WHERE email = :email'); // Adicionado name
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
-        
+
         return $user ?: null;
     }
-    
+
     /**
      * Tenta encontrar um usuário pelo email e verifica a senha.
      * @param string $email
@@ -34,38 +34,43 @@ class UserModel {
         // Se o usuário for encontrado e a senha corresponder ao hash salvo
         if ($user && password_verify($password, $user['password'])) {
             // Remove o hash da senha antes de retornar (segurança)
-            unset($user['password']); 
+            unset($user['password']);
             return $user;
         }
-        
+
         return null;
     }
 
 
     /**
      * Cria um novo usuário no banco de dados.
+     * @param string $name <<< MUDANÇA: Nome vem primeiro agora
      * @param string $email
-     * @param string $password
-     * @return bool Retorna true em caso de sucesso.
+     * @param string $password Senha pura (será hasheada aqui)
+     * @return int|false Retorna o ID do usuário criado ou false em caso de erro. <<< MUDANÇA: Retorna ID
      */
-    public function create(string $email, string $password): bool {
+    public function create(string $name, string $email, string $password) // <<< ORDEM MUDOU
+    {
         // Gera o hash seguro da senha
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        // Define o nome inicial como a parte inicial do e-mail
-        $name = ucfirst(explode('@', $email)[0]); 
 
         try {
             $stmt = $this->db->prepare(
-                'INSERT INTO users (email, password, name, provider) VALUES (:email, :password, :name, "email")'
+                'INSERT INTO users (name, email, password, provider) VALUES (:name, :email, :password, "email")' // <<< ORDEM MUDOU AQUI TAMBÉM
             );
-            return $stmt->execute([
+            $success = $stmt->execute([
+                'name' => $name, // <<< MUDANÇA
                 'email' => $email,
                 'password' => $hashedPassword,
-                'name' => $name,
             ]);
+
+            if ($success) {
+                return $this->db->lastInsertId(); // <<< MUDANÇA: Retorna o ID
+            }
+            return false;
+
         } catch (PDOException $e) {
-            // Se ocorrer um erro (ex: falha de conexão, erro na query), retorna false
+            error_log("Erro ao criar usuário: " . $e->getMessage()); // É bom logar o erro
             return false;
         }
     }
