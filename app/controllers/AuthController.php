@@ -1,18 +1,18 @@
+
 <?php
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-// Inclui o novo AuthService
+// Inclui o AuthService
 require_once __DIR__ . '/../services/AuthService.php';
 
 class AuthController {
     private $userModel; // Mantemos para os métodos não refatorados ainda
-    private $authService; // Nova dependência
+    private $authService; // Dependência do serviço
 
     public function __construct() {
-        // Vamos padronizar e usar o UserModel, que é mais completo
         require_once __DIR__ . '/../models/UserModel.php';
         $this->userModel = new UserModel();
         $this->authService = new AuthService(); // Instancia o serviço
@@ -23,35 +23,19 @@ class AuthController {
     // =======================================================
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // 1. Pegar dados do POST
-            $data = [
-                'name'             => $_POST['name'] ?? '', // Formulário pode ou não ter nome
-                'email'            => $_POST['email'] ?? '',
-                'password'         => $_POST['password'] ?? '',
-                'password_confirm' => $_POST['password_confirm'] ?? '' // Precisa adicionar no form HTML
-            ];
-
-            // 2. Chamar o Serviço
+            $data = $_POST;
             $result = $this->authService->registerUser($data);
-
-            // 3. Tratar o resultado
             if ($result['success']) {
-                // Sucesso: Redireciona para login com mensagem flash (se tiver sistema de msg)
-                // Ou faz login automático e redireciona para home
-                // Por simplicidade, vamos redirecionar para login
                 if (session_status() === PHP_SESSION_NONE) session_start();
-                $_SESSION['success_message'] = $result['message']; // Mensagem flash simples
+                $_SESSION['success_message'] = $result['message'];
                 header("Location: " . BASE_URL . "/auth/login");
                 exit;
             } else {
-                // Erro: Guarda os erros e recarrega a view de registro
                 $errors = $result['errors'];
-                $oldData = $data; // Para repopular o formulário
+                $oldData = $data;
                 include __DIR__ . '/../views/auth/register.php';
             }
         } else {
-            // Método GET: Apenas exibe o formulário
-            // Limpa mensagens flash antigas
             if (session_status() === PHP_SESSION_NONE) session_start();
             unset($_SESSION['success_message']);
             include __DIR__ . '/../views/auth/register.php';
@@ -63,80 +47,122 @@ class AuthController {
     // =======================================================
     public function apiRegister() {
         header('Content-Type: application/json; charset=utf-8');
-
-        // 1. Validar Método
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405); // Method Not Allowed
+            http_response_code(405);
             echo json_encode(['error' => 'Método não permitido, use POST']);
             return;
         }
-
-        // 2. Pegar dados do JSON
         $data = json_decode(file_get_contents('php://input'), true);
         if (!is_array($data)) {
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             echo json_encode(['error' => 'JSON inválido']);
             return;
         }
-
-        // 3. Chamar o Serviço
         $result = $this->authService->registerUser($data);
-
-        // 4. Retornar a resposta JSON
         if ($result['success']) {
-            http_response_code(201); // Created
+            http_response_code(201);
             echo json_encode(['message' => $result['message'], 'user' => $result['user']]);
         } else {
-            http_response_code(422); // Unprocessable Entity (Erro de validação)
+            http_response_code(422);
             echo json_encode(['errors' => $result['errors']]);
         }
     }
 
-
-    // --- MÉTODOS ANTIGOS (login, logout, recuperação) ---
-    // Eles ainda não foram refatorados, mas continuam funcionando
-    // Serão refatorados nas próximas tarefas (TS-Auth-02, 03, 04)
-
+    // =======================================================
+    // MÉTODO 'login' (WEB) - REFATORADO (TS-Auth-02)
+    // =======================================================
     public function login() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        // Se já estiver logado (sessão ativa), redireciona para home
         if (!empty($_SESSION['user'])) {
             header("Location: " . BASE_URL . "/home");
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            // TODO: Refatorar para usar AuthService->loginUser() na TS-Auth-02
-            $user = $this->userModel->findByEmail($email);
-
-            if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user'] = [
-                    'id' => $user['id'],
-                    'name' => $user['name'] ?? explode('@', $user['email'])[0], // Garante nome
-                    'email' => $user['email']
-                ];
+            $credentials = $_POST;
+            $result = $this->authService->loginUser($credentials);
+            if ($result['success']) {
                 header("Location: " . BASE_URL . "/home");
                 exit;
             } else {
-                $error = "E-mail ou senha inválidos!";
+                $error = $result['errors'][0] ?? 'Erro desconhecido no login.';
+                $success_message = $_SESSION['success_message'] ?? null;
+                unset($_SESSION['success_message']);
                 include __DIR__ . '/../views/auth/login.php';
             }
         } else {
-             // Recupera e limpa mensagem flash de sucesso do registro
             $success_message = $_SESSION['success_message'] ?? null;
             unset($_SESSION['success_message']);
             include __DIR__ . '/../views/auth/login.php';
         }
     }
 
-    public function logout() {
-        // TODO: Refatorar para usar AuthService->logoutUser() na TS-Auth-03
+    // =======================================================
+    // MÉTODO 'apiLogin' (API) - NOVO (TS-Auth-02)
+    // =======================================================
+    public function apiLogin() {
+        header('Content-Type: application/json; charset=utf-8');
         if (session_status() === PHP_SESSION_NONE) session_start();
-        session_destroy();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido, use POST']);
+            return;
+        }
+        $credentials = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($credentials)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido']);
+            return;
+        }
+        $result = $this->authService->loginUser($credentials);
+        if ($result['success']) {
+            http_response_code(200);
+            echo json_encode([
+                'message' => $result['message'],
+                'user' => $result['user'],
+                'session_id' => session_id()
+             ]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['errors' => $result['errors']]);
+        }
+    }
+
+    // =======================================================
+    // MÉTODO 'logout' (WEB) - REFATORADO (TS-Auth-03)
+    // =======================================================
+    public function logout() {
+        // Chama o serviço para destruir a sessão
+        $this->authService->logoutUser();
+        // Redireciona para a página de login
         header("Location: " . BASE_URL . "/auth/login");
         exit;
     }
+
+    // =======================================================
+    // MÉTODO 'apiLogout' (API) - NOVO (TS-Auth-03)
+    // =======================================================
+    public function apiLogout() {
+        header('Content-Type: application/json; charset=utf-8');
+        // Chama o serviço para destruir a sessão
+        $result = $this->authService->logoutUser();
+
+        // Retorna a resposta JSON (sempre sucesso, idealmente)
+        // O método POST é usado por convenção para ações que alteram estado (destruir sessão)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+             http_response_code(405); // Method Not Allowed
+             echo json_encode(['error' => 'Método não permitido, use POST']);
+             return;
+        }
+
+        http_response_code(200); // OK
+        echo json_encode(['message' => $result['message']]);
+    }
+
+
+    // --- MÉTODOS ANTIGOS (recuperação) ---
+    // Eles ainda não foram refatorados
 
     public function forgotPassword() {
         // TODO: Refatorar para usar AuthService na TS-Auth-04
@@ -210,9 +236,10 @@ class AuthController {
         $mail = new PHPMailer(true);
         $resetLink = BASE_URL . '/auth/reset-password?token=' . $token;
         try {
+            // Configurações do PHPMailer... (seu código aqui)
             $mail->CharSet = 'UTF-8';
             $mail->isSMTP();
-            $mail->Host       = SMTP_HOST;
+            $mail->Host       = SMTP_HOST; // Constantes do config.php
             $mail->SMTPAuth   = true;
             $mail->Username   = SMTP_USER;
             $mail->Password   = SMTP_PASS;

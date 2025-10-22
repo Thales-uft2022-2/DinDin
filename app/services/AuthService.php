@@ -1,3 +1,4 @@
+
 <?php
 
 class AuthService
@@ -16,12 +17,11 @@ class AuthService
     /**
      * Valida os dados e registra um novo usuário.
      * (TS-Auth-01)
-     *
-     * @param array $data Contém 'email', 'password', 'password_confirm', 'name' (opcional)
-     * @return array ['success' => bool, 'errors' => array, 'message' => string, 'user' => array|null]
+     * ... (código do registerUser) ...
      */
     public function registerUser(array $data): array
     {
+        // [CÓDIGO OMITIDO POR BREVIDADE - Mantenha o código existente aqui]
         // 1. Limpar e Validar Dados Essenciais
         $email = filter_var(trim($data['email'] ?? ''), FILTER_VALIDATE_EMAIL);
         $password = $data['password'] ?? '';
@@ -58,8 +58,7 @@ class AuthService
         $userId = $this->userModel->create($name, $email, $password); // Supondo que create retorne o ID ou false
 
         if ($userId) {
-            // Poderia buscar o usuário recém-criado se necessário retornar mais dados
-            $newUser = ['id' => $userId, 'name' => $name, 'email' => $email]; // Simplificado
+            $newUser = ['id' => $userId, 'name' => $name, 'email' => $email];
             return [
                 'success' => true,
                 'message' => 'Usuário registrado com sucesso!',
@@ -74,6 +73,74 @@ class AuthService
         }
     }
 
-    // --- Métodos de Login, Logout, Recuperar Senha virão aqui nas próximas tarefas ---
+    /**
+     * Valida as credenciais e realiza o login do usuário.
+     * (TS-Auth-02)
+     * ... (código do loginUser) ...
+     */
+    public function loginUser(array $credentials): array
+    {
+        // [CÓDIGO OMITIDO POR BREVIDADE - Mantenha o código existente aqui]
+        // 1. Validar dados de entrada
+        $email = filter_var(trim($credentials['email'] ?? ''), FILTER_VALIDATE_EMAIL);
+        $password = $credentials['password'] ?? '';
+
+        if (!$email || empty($password)) {
+            return ['success' => false, 'errors' => ['E-mail ou senha inválidos.'], 'message' => 'Falha na autenticação.'];
+        }
+
+        // 2. Chamar o Model para verificar as credenciais
+        $user = $this->userModel->findByEmailAndPassword($email, $password);
+
+        if ($user) {
+            $userData = [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email']
+            ];
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            session_regenerate_id(true);
+            $_SESSION['user'] = $userData;
+
+            return ['success' => true, 'message' => 'Login realizado com sucesso!', 'user' => $userData];
+        } else {
+            return ['success' => false, 'errors' => ['E-mail ou senha inválidos.'], 'message' => 'Falha na autenticação.'];
+        }
+    }
+
+    /**
+     * Realiza o logout do usuário destruindo a sessão.
+     * (TS-Auth-03 - NOVO MÉTODO)
+     *
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function logoutUser(): array
+    {
+        // Garante que a sessão está iniciada antes de tentar destruí-la
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Limpa todas as variáveis de sessão
+        $_SESSION = [];
+
+        // Se estiver usando cookies de sessão, apaga o cookie também
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+
+        // Finalmente, destrói a sessão
+        session_destroy();
+
+        return ['success' => true, 'message' => 'Logout realizado com sucesso!'];
+    }
+
+    // --- Método de Recuperar Senha virá aqui ---
 
 }
