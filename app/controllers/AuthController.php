@@ -9,13 +9,13 @@ use PHPMailer\PHPMailer\Exception;
 require_once __DIR__ . '/../services/AuthService.php';
 
 class AuthController {
-    private $userModel; // Mantemos para os métodos não refatorados ainda
+    // Removido $userModel, pois todas as ações agora usam AuthService
     private $authService; // Dependência do serviço
 
     public function __construct() {
-        require_once __DIR__ . '/../models/UserModel.php';
-        $this->userModel = new UserModel();
-        $this->authService = new AuthService(); // Instancia o serviço
+        // Instancia o serviço
+        $this->authService = new AuthService();
+        // Não precisa mais instanciar UserModel aqui
     }
 
     // =======================================================
@@ -78,7 +78,6 @@ class AuthController {
             header("Location: " . BASE_URL . "/home");
             exit;
         }
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $credentials = $_POST;
             $result = $this->authService->loginUser($credentials);
@@ -118,11 +117,7 @@ class AuthController {
         $result = $this->authService->loginUser($credentials);
         if ($result['success']) {
             http_response_code(200);
-            echo json_encode([
-                'message' => $result['message'],
-                'user' => $result['user'],
-                'session_id' => session_id()
-             ]);
+            echo json_encode(['message' => $result['message'], 'user' => $result['user'], 'session_id' => session_id()]);
         } else {
             http_response_code(401);
             echo json_encode(['errors' => $result['errors']]);
@@ -133,9 +128,7 @@ class AuthController {
     // MÉTODO 'logout' (WEB) - REFATORADO (TS-Auth-03)
     // =======================================================
     public function logout() {
-        // Chama o serviço para destruir a sessão
         $this->authService->logoutUser();
-        // Redireciona para a página de login
         header("Location: " . BASE_URL . "/auth/login");
         exit;
     }
@@ -145,118 +138,171 @@ class AuthController {
     // =======================================================
     public function apiLogout() {
         header('Content-Type: application/json; charset=utf-8');
-        // Chama o serviço para destruir a sessão
-        $result = $this->authService->logoutUser();
-
-        // Retorna a resposta JSON (sempre sucesso, idealmente)
-        // O método POST é usado por convenção para ações que alteram estado (destruir sessão)
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-             http_response_code(405); // Method Not Allowed
+             http_response_code(405);
              echo json_encode(['error' => 'Método não permitido, use POST']);
              return;
         }
-
-        http_response_code(200); // OK
+        $result = $this->authService->logoutUser();
+        http_response_code(200);
         echo json_encode(['message' => $result['message']]);
     }
 
+    // =======================================================
+    // MÉTODOS DE RECUPERAÇÃO DE SENHA (WEB) - REFATORADOS (TS-Auth-04)
+    // =======================================================
 
-    // --- MÉTODOS ANTIGOS (recuperação) ---
-    // Eles ainda não foram refatorados
-
+    /**
+     * Exibe o formulário para solicitar a redefinição (WEB).
+     */
     public function forgotPassword() {
-        // TODO: Refatorar para usar AuthService na TS-Auth-04
+        // Apenas exibe a view
         include __DIR__ . '/../views/auth/forgot-password.php';
     }
 
+    /**
+     * Processa a solicitação de redefinição de senha (WEB).
+     * Chama o AuthService para lidar com a lógica e o envio do e-mail.
+     */
     public function sendResetLink() {
-        // TODO: Refatorar para usar AuthService na TS-Auth-04
+        $message = ''; // Mensagem a ser exibida na view
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email'] ?? '');
-            $user = $this->userModel->findByEmail($email); // Ainda usa o model
-
-            if ($user) {
-                $token = bin2hex(random_bytes(50));
-                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-                if ($this->userModel->saveResetToken($email, $token, $expires)) { // Ainda usa o model
-                    $this->sendPasswordResetEmail($email, $token); // Função auxiliar
-                }
-            }
-            include __DIR__ . '/../views/auth/reset-link-sent.php';
-        } else {
-            header("Location: " . BASE_URL . "/auth/forgot-password");
-            exit;
+            $email = $_POST['email'] ?? '';
+            // Chama o serviço, que sempre retorna a mensagem genérica por segurança
+            $result = $this->authService->requestPasswordReset($email);
+            $message = $result['message']; // Pega a mensagem do serviço
         }
+        // Exibe a view que mostra a mensagem (seja do POST ou não)
+        include __DIR__ . '/../views/auth/reset-link-sent.php';
     }
 
+    /**
+     * Exibe o formulário para criar uma nova senha (link do e-mail - WEB).
+     * Verifica se o token é válido antes de mostrar o formulário.
+     */
     public function resetPassword() {
-        // TODO: Refatorar para usar AuthService na TS-Auth-04
         $token = $_GET['token'] ?? '';
-        $user = $this->userModel->findUserByResetToken($token); // Ainda usa o model
+        $user = $this->authService->verifyResetToken($token); // Usa o serviço para verificar
 
         if (!$user) {
-            die("Token de redefinição inválido ou expirado. Por favor, solicite um novo link.");
+            // Se o token for inválido ou expirado, mostra uma mensagem de erro
+            // Poderia ser uma view de erro mais elaborada
+            include_once __DIR__ . '/../views/_header.php'; // Usa header/footer
+            echo '<div class="form-container"><h1>Erro</h1><p>Token de redefinição inválido ou expirado. Por favor, solicite um novo link.</p><p><a href="' . BASE_URL . '/auth/forgot-password">Solicitar Novo Link</a></p></div>';
+            include_once __DIR__ . '/../views/_footer.php';
+            exit;
         }
+
+        // Se o token for válido, passa o token para a view
         include __DIR__ . '/../views/auth/reset-password.php';
     }
 
+    /**
+     * Processa o formulário de nova senha (WEB).
+     * Chama o AuthService para validar token e atualizar a senha.
+     */
     public function updatePassword() {
-        // TODO: Refatorar para usar AuthService na TS-Auth-04
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = $_POST['token'] ?? '';
             $password = $_POST['password'] ?? '';
             $password_confirm = $_POST['password_confirm'] ?? '';
 
-            if (empty($password) || $password !== $password_confirm) {
-                die("As senhas não coincidem ou estão em branco. Por favor, tente novamente.");
-            }
-            if (strlen($password) < 8) {
-                die("A senha deve ter no mínimo 8 caracteres.");
-            }
+            // Chama o serviço para redefinir a senha
+            $result = $this->authService->resetPasswordWithToken($token, $password, $password_confirm);
 
-            $user = $this->userModel->findUserByResetToken($token); // Ainda usa o model
-            if (!$user) {
-                die("Token inválido ou expirado. Ação não permitida.");
-            }
-
-            if ($this->userModel->updatePassword($user['id'], $password)) { // Ainda usa o model
+            if ($result['success']) {
+                // Sucesso: mostra a página de sucesso
                 include __DIR__ . '/../views/auth/password-reset-success.php';
             } else {
-                die("Ocorreu um erro ao atualizar sua senha. Tente novamente.");
+                // Erro: Recarrega o formulário mostrando os erros
+                $errors = $result['errors'];
+                // Precisamos passar o token de volta para a view
+                include __DIR__ . '/../views/auth/reset-password.php';
             }
         } else {
+             // Se não for POST, redireciona para login (ou outra página)
              header("Location: " . BASE_URL . "/auth/login");
              exit;
         }
     }
 
-    // Função auxiliar - pode ser movida para um Service/Helper depois
-    private function sendPasswordResetEmail($email, $token) {
-        $mail = new PHPMailer(true);
-        $resetLink = BASE_URL . '/auth/reset-password?token=' . $token;
-        try {
-            // Configurações do PHPMailer... (seu código aqui)
-            $mail->CharSet = 'UTF-8';
-            $mail->isSMTP();
-            $mail->Host       = SMTP_HOST; // Constantes do config.php
-            $mail->SMTPAuth   = true;
-            $mail->Username   = SMTP_USER;
-            $mail->Password   = SMTP_PASS;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = SMTP_PORT;
-            $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
-            $mail->addAddress($email);
-            $mail->isHTML(true);
-            $mail->Subject = 'Redefinicao de Senha - DinDin';
-            $mail->Body    = "Olá,<br><br>Você solicitou a redefinição de sua senha. Clique no link abaixo para criar uma nova senha:<br><br>"
-                           . "<a href='{$resetLink}'>Redefinir Minha Senha</a><br><br>"
-                           . "Se você não solicitou isso, por favor ignore este e-mail.<br><br>"
-                           . "Atenciosamente,<br>Equipe DinDin";
-            $mail->AltBody = "Para redefinir sua senha, copie e cole este link no seu navegador: {$resetLink}";
-            $mail->send();
-        } catch (Exception $e) {
-            error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+    // =======================================================
+    // MÉTODOS DE RECUPERAÇÃO DE SENHA (API) - NOVOS (TS-Auth-04)
+    // =======================================================
+
+    /**
+     * Solicita o envio do link de redefinição de senha via API.
+     */
+    public function apiForgotPassword() {
+        header('Content-Type: application/json; charset=utf-8');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido, use POST']);
+            return;
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data) || !isset($data['email'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido ou campo "email" ausente.']);
+            return;
+        }
+
+        // Chama o serviço (que sempre retorna a mesma mensagem por segurança)
+        $result = $this->authService->requestPasswordReset($data['email']);
+
+        // Retorna a mensagem genérica
+        http_response_code(200); // OK (mesmo se o e-mail não existir)
+        echo json_encode(['message' => $result['message']]);
+    }
+
+    /**
+     * Redefine a senha via API usando o token.
+     */
+    public function apiResetPassword() {
+        header('Content-Type: application/json; charset=utf-8');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido, use POST']);
+            return;
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido.']);
+            return;
+        }
+
+        // Pega os dados necessários do JSON
+        $token = $data['token'] ?? '';
+        $password = $data['password'] ?? '';
+        $password_confirm = $data['password_confirm'] ?? '';
+
+        // Chama o serviço para redefinir a senha
+        $result = $this->authService->resetPasswordWithToken($token, $password, $password_confirm);
+
+        // Retorna a resposta
+        if ($result['success']) {
+            http_response_code(200); // OK
+            echo json_encode(['message' => $result['message']]);
+        } else {
+            // Pode ser 422 (validação) ou 400/404 (token inválido)
+            // Vamos usar 400 como genérico para token/validação aqui
+            http_response_code(400);
+            echo json_encode(['errors' => $result['errors']]);
         }
     }
+
+
+    // --- FUNÇÃO AUXILIAR DE EMAIL ---
+    // Mantida aqui por enquanto, mas idealmente iria para uma classe separada (MailerService, NotificationService)
+    // O AuthService agora chama a interna: sendPasswordResetEmailInternal
+    private function sendPasswordResetEmail($email, $token) {
+       // Este método não é mais chamado diretamente,
+       // mas pode ser mantido se outra parte do código o usar.
+       // A lógica foi movida para AuthService->sendPasswordResetEmailInternal
+       trigger_error("AuthController::sendPasswordResetEmail is deprecated. Use AuthService.", E_USER_DEPRECATED);
+       // Poderia chamar o método do serviço se necessário manter compatibilidade
+       // $this->authService->sendPasswordResetEmailInternal($email, $token); // Não recomendado misturar assim
+    }
+
 }

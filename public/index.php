@@ -32,17 +32,18 @@ $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas (COM TODAS AS ROTAS RESOLVIDAS + AUTH REGISTER + AUTH LOGIN + AUTH LOGOUT)
+// Tabela de rotas explícitas (COM TODAS AS ROTAS RESOLVIDAS + AUTH COMPLETO)
 $routes = [
     'home'                   => ['HomeController', 'index'],
     'auth/login'             => ['AuthController', 'login'],             // Rota WEB Login
     'auth/logout'            => ['AuthController', 'logout'],            // Rota WEB Logout
     'auth/register'          => ['AuthController', 'register'],          // Rota WEB Registro
 
-    'auth/forgot-password'   => ['AuthController', 'forgotPassword'],
-    'auth/send-reset-link'   => ['AuthController', 'sendResetLink'],
-    'auth/reset-password'    => ['AuthController', 'resetPassword'],
-    'auth/update-password'   => ['AuthController', 'updatePassword'],
+    // Rotas WEB de Recuperação de Senha (ainda apontam para AuthController)
+    'auth/forgot-password'   => ['AuthController', 'forgotPassword'],    // Exibe form
+    'auth/send-reset-link'   => ['AuthController', 'sendResetLink'],     // Processa pedido (WEB)
+    'auth/reset-password'    => ['AuthController', 'resetPassword'],     // Exibe form nova senha (link do email)
+    'auth/update-password'   => ['AuthController', 'updatePassword'],    // Processa nova senha (WEB)
 
     'transactions'           => ['TransactionsController', 'index'],
     'transactions/create'    => ['TransactionsController', 'create'],
@@ -60,7 +61,10 @@ $routes = [
     // --- APIs de Autenticação ---
     'api/auth/register'       => ['AuthController', 'apiRegister'],       // TS-Auth-01
     'api/auth/login'          => ['AuthController', 'apiLogin'],          // TS-Auth-02
-    'api/auth/logout'         => ['AuthController', 'apiLogout'],         // TS-Auth-03 (NOVA)
+    'api/auth/logout'         => ['AuthController', 'apiLogout'],         // TS-Auth-03
+    // ROTAS NOVAS (do Cristian) - TS-Auth-04
+    'api/auth/forgot-password'=> ['AuthController', 'apiForgotPassword'], // Solicita reset via API
+    'api/auth/reset-password' => ['AuthController', 'apiResetPassword'],  // Define nova senha via API (com token)
 ];
 
 // Rota padrão (somente a raiz vai para login)
