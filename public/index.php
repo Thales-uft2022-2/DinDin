@@ -1,3 +1,4 @@
+
 <?php
 
 // ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
@@ -31,12 +32,12 @@ $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas (COM TODAS AS ROTAS RESOLVIDAS)
+// Tabela de rotas explícitas (COM TODAS AS ROTAS RESOLVIDAS + AUTH REGISTER + AUTH LOGIN + AUTH LOGOUT)
 $routes = [
     'home'                   => ['HomeController', 'index'],
-    'auth/login'             => ['AuthController', 'login'],
-    'auth/logout'            => ['AuthController', 'logout'],
-    'auth/register'          => ['AuthController', 'register'], // Rota WEB de registro
+    'auth/login'             => ['AuthController', 'login'],             // Rota WEB Login
+    'auth/logout'            => ['AuthController', 'logout'],            // Rota WEB Logout
+    'auth/register'          => ['AuthController', 'register'],          // Rota WEB Registro
 
     'auth/forgot-password'   => ['AuthController', 'forgotPassword'],
     'auth/send-reset-link'   => ['AuthController', 'sendResetLink'],
@@ -58,6 +59,8 @@ $routes = [
 
     // --- APIs de Autenticação ---
     'api/auth/register'       => ['AuthController', 'apiRegister'],       // TS-Auth-01
+    'api/auth/login'          => ['AuthController', 'apiLogin'],          // TS-Auth-02
+    'api/auth/logout'         => ['AuthController', 'apiLogout'],         // TS-Auth-03 (NOVA)
 ];
 
 // Rota padrão (somente a raiz vai para login)
