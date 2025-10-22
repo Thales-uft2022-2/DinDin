@@ -31,7 +31,7 @@ $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas (COM TODAS AS ROTAS DE API + AUTH REGISTER)
+// Tabela de rotas explícitas (COM TODAS AS ROTAS RESOLVIDAS)
 $routes = [
     'home'                   => ['HomeController', 'index'],
     'auth/login'             => ['AuthController', 'login'],
@@ -51,14 +51,13 @@ $routes = [
     'transactions/delete'    => ['TransactionsController', 'delete'],
 
     // --- APIs de Transações ---
-    'api/transactions/create' => ['TransactionsController', 'apiCreate'],
-    'api/transactions'        => ['TransactionsController', 'apiIndex'],
-    'api/transactions/update' => ['TransactionsController', 'apiUpdate'],
-    'api/transactions/delete' => ['TransactionsController', 'apiDelete'],
+    'api/transactions/create' => ['TransactionsController', 'apiCreate'], // TS-Svc-01
+    'api/transactions'        => ['TransactionsController', 'apiIndex'],  // TS-Svc-02
+    'api/transactions/update' => ['TransactionsController', 'apiUpdate'], // TS-Svc-03
+    'api/transactions/delete' => ['TransactionsController', 'apiDelete'], // TS-Svc-04
 
     // --- APIs de Autenticação ---
-    // ROTA NOVA (do Gabriel) - TS-Auth-01
-    'api/auth/register'       => ['AuthController', 'apiRegister'],
+    'api/auth/register'       => ['AuthController', 'apiRegister'],       // TS-Auth-01
 ];
 
 // Rota padrão (somente a raiz vai para login)

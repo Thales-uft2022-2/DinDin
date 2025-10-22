@@ -227,7 +227,6 @@ class TransactionsController
             include __DIR__ . '/../views/transactions/message.php';
             return;
         }
-
         // 2. Chamar o Serviço (que tem a lógica de segurança)
         $result = $this->transactionService->deleteTransaction($transactionId, $userId);
 
@@ -357,4 +356,5 @@ class TransactionsController
 
         include_once __DIR__ . '/../views/_footer.php';
     }
+
 }

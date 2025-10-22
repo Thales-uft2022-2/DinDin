@@ -176,7 +176,6 @@ class TransactionService
 
     /**
      * Valida e EXCLUI uma transação existente.
-     * (TS-Svc-04)
      *
      * @param int $transactionId ID da transação a ser excluída
      * @param int $userId ID do usuário autenticado (para segurança)
@@ -202,4 +201,8 @@ class TransactionService
             return ['success' => false, 'errors' => ['Erro desconhecido ao excluir do banco.'], 'status_code' => 500]; // 500 Internal Server Error
         }
     }
+
 }
+
+
+
