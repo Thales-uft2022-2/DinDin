@@ -81,6 +81,37 @@ Com o **DinDin**, você pode:
   Como desenvolvedor, eu quero ajustar os controllers existentes para que eles consumam a nova camada de serviço, garantindo que a interface continue funcionando como esperado.
 
 ---
+# 📊 Sprint 4 — Dashboard e Categorias
+
+**Valor:** Entregar uma visão clara e rápida da **saúde financeira do usuário** através de um **dashboard**, e permitir **maior personalização** no controle de gastos com a **gestão de categorias**.
+
+---
+
+##  Tarefas
+
+1. **Dashboard de Saldo Mensal**  
+   **Como:** usuário  
+   **Quero:** visualizar um dashboard na tela inicial com o saldo do mês (total de receitas, total de despesas e balanço)  
+   **Para:** acompanhar meu desempenho financeiro em tempo real. 
+
+2. **Gestão de Categorias Personalizadas (CRUD)**  
+   **Como:** usuário  
+   **Quero:** criar, visualizar, editar e excluir minhas próprias categorias  
+   **Para:** organizar meus lançamentos financeiros de acordo com a minha realidade. 
+
+3. **Integração das Categorias no Lançamento**  
+   **Como:** usuário  
+   **Quero:** que o formulário de "Cadastrar Transação" (Sprint 1) utilize as categorias que eu criei  
+   **Para:** classificar minhas receitas e despesas corretamente.
+
+4. **Implementação de Testes Unitários (Backend)**  
+   **Como:** desenvolvedor  
+   **Quero:** criar testes unitários para as regras de negócio (cálculo de saldo do dashboard e CRUD de categorias)  
+   **Para:** garantir a confiabilidade e a corretude dos dados.
+
+---
+
+
 ### Features
 ## 📌 Sprint 1 — Transações
 
@@ -275,6 +306,89 @@ Com o **DinDin**, você pode:
 **Para** isolar e testar essa funcionalidade de segurança crítica.
 
 ---
+## 📌 Sprint 4 — Dashboard e Categorias
+
+### US-Dash-01 — Visualizar Saldo Mensal
+**Como** usuário autenticado  
+**Quero** visualizar um dashboard na tela inicial com o saldo do mês (total de receitas, total de despesas e balanço)  
+**Para** acompanhar meu desempenho financeiro em tempo real.
+
+**Critérios de Aceite**
+- Dado que estou na página inicial (dashboard) e tenho transações no mês corrente, quando a página carrega, então vejo três valores claros: **Total de Receitas (mês)**, **Total de Despesas (mês)** e **Balanço (Receitas - Despesas)**.
+- Dado que não tenho transações no mês corrente, quando acesso o dashboard, então vejo os valores zerados (R$ 0,00) ou um estado indicando **"Sem movimentações"**.
+- Dado que adiciono uma nova transação do mês corrente, quando retorno ao dashboard, então os valores do saldo mensal são atualizados.
+
+---
+
+### US-Cat-01 — Criar Categoria
+**Como** usuário autenticado  
+**Quero** criar novas categorias (ex: "Alimentação", "Transporte")  
+**Para** classificar meus gastos de forma personalizada.
+
+**Critérios de Aceite**
+- Ao clicar em **"Nova Categoria"**, inserir um nome válido e salvar → a categoria aparece na lista com mensagem de sucesso.
+- Tentar salvar sem nome ou com nome já existente → exibir mensagem de erro ("Nome é obrigatório" / "Categoria já existe").
+
+---
+
+### US-Cat-02 — Listar Categorias
+**Como** usuário autenticado  
+**Quero** ver uma lista de todas as minhas categorias personalizadas  
+**Para** saber como estou organizando meus lançamentos.
+
+**Critérios de Aceite**
+- Se houver categorias cadastradas → exibir lista com opções **Editar** e **Excluir**.
+- Se não houver categorias → exibir estado vazio com instrução para adicionar a primeira categoria.
+
+---
+
+### US-Cat-03 — Editar Categoria
+**Como** usuário autenticado  
+**Quero** editar o nome de uma categoria existente  
+**Para** corrigir erros de digitação ou reclassificar.
+
+**Critérios de Aceite**
+- Editar nome e salvar → ver nome atualizado e mensagem de sucesso.
+- Tentar renomear para nome já existente → exibir erro "Categoria já existe".
+
+---
+
+### US-Cat-04 — Excluir Categoria
+**Como** usuário autenticado  
+**Quero** excluir uma categoria que não uso mais  
+**Para** manter minha lista de categorias limpa.
+
+**Critérios de Aceite**
+- Clicar em **Excluir** → pedir confirmação.
+- Confirmar exclusão → remover e mostrar mensagem de sucesso.
+- Se categoria estiver ligada a transações → ao excluir, atualizar transações associadas (ex: "Sem Categoria" ou `null`).
+
+---
+
+### US-Tx-06 — Usar Categorias Personalizadas no Lançamento
+**Como** usuário autenticado  
+**Quero** selecionar uma categoria personalizada ao cadastrar/editar uma transação  
+**Para** classificar corretamente o lançamento.
+
+**Critérios de Aceite**
+- No formulário de **Adicionar/Editar Transação**, o campo **Categoria** deve apresentar um dropdown com todas as categorias criadas.
+- Selecionar categoria e salvar → exibir a categoria na listagem de transações.
+
+---
+
+### TS-Test-01 — Testes Unitários do Serviço de Dashboard
+**Como** desenvolvedor  
+**Quero** criar testes unitários para a camada de serviço que calcula o saldo do dashboard  
+**Para** garantir que os valores exibidos estão corretos e seguros.
+
+---
+
+### TS-Test-02 — Testes Unitários do Serviço de Categorias (CRUD)
+**Como** desenvolvedor  
+**Quero** criar testes unitários para a camada de serviço que gerencia o CRUD de Categorias  
+**Para** garantir integridade dos dados e isolamento entre usuários.
+
+---
 # 📌 DIVISÃO DAS TAREFAS
 
 ## 1° Sprint - Gestão de Transações
@@ -310,5 +424,19 @@ Com o **DinDin**, você pode:
 | API e Serviço de Login de Usuário (inclui Google) | TS-Auth-02 | Thales | Cristian |
 | API e Serviço de Logout | TS-Auth-03 | Vinicius | Gabriel |
 | API e Serviço de Recuperação de Senha | TS-Auth-04 | Cristian | Thales |
+
+---
+
+### 4ª Sprint - Dashboard e Categorias
+| Atividade                                      | Feature (História Técnica) | Autor     | Revisor  |
+| :--- | :--- | :--- | :--- |
+| Dashboard - Visualizar Saldo Mensal            | US-Dash-01                  | Gabriel  | Cristian  |
+| Categorias - Criar Categoria                   | US-Cat-01                   | Gabriel  | Cristian  |
+| Categorias - Listar Categorias                 | US-Cat-02                   | Cristian   | Gabriel |
+| Categorias - Editar Categoria                  | US-Cat-03                   | Cristian  | Gabriel   |
+| Categorias - Excluir Categoria                 | US-Cat-04                   | Vinicius   | Thales |
+| Transações - Integrar Categorias Personalizadas| US-Tx-06                    | Vinicius  | Thales   |
+| Testes - Serviço de Dashboard                  | TS-Test-01                  | Thales    | Vinicius |
+| Testes - Serviço de Categorias (CRUD)          | TS-Test-02                  | Thales    | Vinicius |
 
 ---
