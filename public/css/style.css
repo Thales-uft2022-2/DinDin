@@ -372,41 +372,92 @@ datalist {
   text-align: center;
   transition: all 0.3
 }
-/* --- CSS para o Logo/Botão Home --- */
+/* --- CSS para o Logo/Botão Home (Movido para Direita - Tamanho Original) --- */
 
 .logo-header-link {
-    /* Posicionamento */
-    position: fixed; /* Fica fixo no canto da tela */
-    top: 25px;       /* 25px do topo */
-    left: 25px;      /* 25px da esquerda */
-    z-index: 1000;   /* Garante que fique na frente de tudo */
-    
-    /* Visual */
+    position: fixed;
+    top: 15px;       /* <<< Voltando para 15px */
+    right: 15px;      /* <<< Ajustando para 15px */
+    left: auto;
+    z-index: 1000;
     display: block;
-    padding: 10px; /* Um espaçamento interno */
+    padding: 10px;     /* <<< Voltando para 10px */
     background-color: #fff;
-    border-radius: 16px; /* Bordas arredondadas */
-    
-    /* --- Efeito 3D (Sombra) --- */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    
-    /* Animação suave */
+    border-radius: 16px; /* <<< Voltando para 16px */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* <<< Voltando sombra original */
     transition: all 0.2s ease-in-out;
 }
 
 .logo-header-image {
-    width: 150px; /* Ajuste o tamanho do logo aqui */
+    width: 150px;     /* <<< VOLTANDO PARA 150px */
     height: auto;
-    display: block; /* Remove qualquer espaço extra */
+    display: block;
 }
 
-/* --- Efeito 3D ao passar o mouse --- */
 .logo-header-link:hover {
-    transform: translateY(-5px) scale(1.03); /* Levanta o botão */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
+    transform: translateY(-5px) scale(1.03); /* <<< Voltando efeito original */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* <<< Voltando sombra original */
 }
 
-/* Empurra o conteúdo da página para baixo, para não ficar atrás do logo */
+/* O padding-top do body provavelmente pode ser removido ou
+   mantido baixo, já que o logo está à direita.
+   Verifique como fica melhor visualmente. */
 body {
-    padding-top: 150px; /* Ajuste esse valor se o seu logo for maior */
+    padding-top: 40px; /* Mantenha um valor pequeno ou remova se preferir */
+}
+
+/* Padding do main mantido */
+main.container-fluid {
+    padding-top: 1rem;
+}
+
+/* Margem do H1 mantida */
+h1 {
+    margin-top: 1rem;
+    margin-bottom: 20px;
+    color: #222;
+    font-size: 24px;
+}
+/* --- CSS Adicional para o Logo no Dashboard --- */
+.dashboard-logo {
+    max-width: 250px; /* Ajuste o tamanho máximo da imagem */
+    height: auto;
+    display: block; /* Garante que a imagem se comporta como bloco */
+    margin: 0 auto 30px auto; /* Centraliza e adiciona margem inferior */
+    opacity: 0.8; /* Deixa um pouco transparente para não competir com os dados */
+}
+
+/* Melhorar margens gerais para elementos dentro do container */
+.container.mt-4 {
+    padding-top: 20px; /* Adiciona um pouco de padding no topo do container principal */
+    padding-bottom: 20px; /* Adiciona um pouco de padding na parte inferior */
+}
+/* --- Ajustes de Fonte para o Dashboard (home.php) --- */
+
+/* Saudação e descrição abaixo do título */
+.container.mt-4 .lead {
+    font-size: 1.5rem; /* Um pouco maior que o padrão */
+    color: #555; /* Um cinza um pouco mais escuro */
+}
+
+/* Títulos dentro dos cards (Receitas, Despesas, Saldo) */
+.card .card-title {
+    font-size: 1.8rem; /* Aumenta um pouco o título do card */
+    font-weight: 500; /* Peso médio */
+}
+
+/* Valores principais (R$) dentro dos cards */
+.card .card-text {
+    font-size: 2.2rem; /* Aumenta BASTANTE o valor principal */
+    font-weight: bold;
+}
+
+/* Ajuste opcional para os botões principais, se também parecerem pequenos */
+.btn-lg {
+    font-size: 1.1rem; /* Aumenta um pouco a letra dos botões grandes */
+}
+
+/* Ajuste opcional para o título principal "Dashboard Mensal" */
+.display-4 {
+    font-size: 3.0rem; /* Pode ajustar este valor se quiser maior/menor */
 }
