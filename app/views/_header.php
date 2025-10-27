@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DinDin - Gestor Financeiro</title>
-    
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
 </head>
 <body>
@@ -12,5 +14,5 @@
     <a href="<?= BASE_URL ?>/home" class="logo-header-link">
         <img src="<?= BASE_URL ?>/images/logo_header.jpg" alt="DinDin Home" class="logo-header-image">
     </a>
-    </body>
-</html>
+
+    <main class="container-fluid pt-3">
