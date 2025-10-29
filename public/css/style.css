@@ -1,4 +1,4 @@
-/* --- VARIAVEIS GLOBAIS --- */
+/* --- VARIAVEIS GLOBAIS (MODO CLARO - PADRÃO) --- */
 :root {
     --bs-primary: #0D6EFD;
     --bs-secondary: #6C757D;
@@ -6,24 +6,58 @@
     --bs-danger: #DC3545;
     --bs-info: #0DCAF0;
     --bs-warning: #FFC107;
-    --bs-light: #F8F9FA;
-    --bs-dark: #212529;
+    
+    /* Cores do Tema Claro */
+    --bs-body-bg: #F8F9FA; /* Cor de fundo */
+    --bs-body-color: #212529; /* Cor do texto */
+    --bs-border-color: #dee2e6;
+    --bs-card-bg: #ffffff;
+    --bs-card-header-bg: #ffffff;
+    --bs-table-bg: #ffffff;
+    --bs-table-striped-bg: #F8F9FA;
+    --bs-form-bg: #ffffff;
+    --bs-logo-bg: #ffffff; /* Fundo do logo */
+
     --bs-body-font-family: 'Lato', sans-serif;
     --bs-heading-font-family: 'Poppins', sans-serif;
     --bs-border-radius: 0.375rem;
     --bs-border-radius-lg: 0.5rem;
 }
 
+/* --- VARIÁVEIS DO MODO ESCURO --- */
+[data-bs-theme="dark"] {
+    --bs-primary: #3b82f6; /* Azul um pouco mais claro */
+    --bs-secondary: #9ca3af;
+    --bs-success: #22c55e;
+    --bs-danger: #ef4444;
+    --bs-info: #0DCAF0; /* Mantido */
+    --bs-warning: #FFC107; /* Mantido */
+
+    /* Cores do Tema Escuro */
+    --bs-body-bg: #212529;
+    --bs-body-color: #F8F9FA;
+    --bs-border-color: #495057;
+    --bs-card-bg: #343a40;
+    --bs-card-header-bg: #343a40;
+    --bs-table-bg: #343a40;
+    --bs-table-striped-bg: #3f464d;
+    --bs-form-bg: #343a40;
+    --bs-logo-bg: #343a40;
+}
+
+
 /* --- ESTILOS GLOBAIS --- */
 body {
     font-family: var(--bs-body-font-family);
-    background-color: var(--bs-light);
-    color: var(--bs-dark);
-    /* Padding-top para o logo fixo */
-    padding-top: 90px; /* Ajuste fino para o logo de 100px + margens */
+    /* Cores agora são controladas por variáveis de tema */
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    padding-top: 90px;
     padding-left: 0;
     padding-right: 0;
     padding-bottom: 0;
+    /* Transição suave de cores */
+    transition: background-color 0.2s linear, color 0.2s linear;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -38,9 +72,51 @@ a {
 }
 
 a:hover {
-    color: #0b5ed7; /* Azul um pouco mais escuro no hover */
-    text-decoration: none; /* Remove sublinhado padrão no hover, prefira feedback visual */
+    color: var(--bs-primary); /* Ajustado para usar variável */
+    filter: brightness(0.9);
+    text-decoration: none;
 }
+
+/* --- BOTÃO DE TEMA (NOVO) --- */
+.theme-toggle {
+    position: fixed;
+    top: 15px;
+    left: 15px; /* Colocado no canto superior esquerdo */
+    z-index: 1030;
+    width: 45px; /* Um pouco maior */
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bs-card-bg); /* Adapta-se ao tema */
+    color: var(--bs-body-color); /* Adapta-se ao tema */
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg); /* Mais arredondado */
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s ease-in-out;
+}
+.theme-toggle:hover {
+    background-color: var(--bs-body-bg);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transform: translateY(-2px);
+}
+
+/* Lógica para mostrar o ícone correto */
+[data-bs-theme="dark"] .theme-toggle .bi-sun-fill {
+    display: block; /* Mostra o sol no modo escuro */
+}
+[data-bs-theme="dark"] .theme-toggle .bi-moon-stars-fill {
+    display: none; /* Esconde a lua no modo escuro */
+}
+
+[data-bs-theme="light"] .theme-toggle .bi-sun-fill {
+    display: none; /* Esconde o sol no modo claro */
+}
+[data-bs-theme="light"] .theme-toggle .bi-moon-stars-fill {
+    display: block; /* Mostra a lua no modo claro */
+}
+
 
 /* --- LOGO HEADER --- */
 .logo-header-link {
@@ -51,13 +127,14 @@ a:hover {
     z-index: 1030;
     display: block;
     padding: 8px;
-    background-color: #fff;
+    /* Cor de fundo agora usa variável */
+    background-color: var(--bs-logo-bg);
     border-radius: var(--bs-border-radius-lg);
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 .logo-header-image {
-    width: 100px; /* Tamanho médio */
+    width: 100px;
     height: auto;
     display: block;
 }
@@ -67,6 +144,7 @@ a:hover {
 }
 
 /* --- BOTÕES --- */
+/* (Seu código de botões .btn ... .btn-lg ... .btn-sm ... está ok) */
 .btn {
     font-family: var(--bs-heading-font-family);
     font-weight: 500;
@@ -84,66 +162,96 @@ a:hover {
 }
 /* Cores (Mantém padrão Bootstrap) */
 .btn-primary { background-color: var(--bs-primary); border-color: var(--bs-primary); color: #fff; }
-.btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; color: #fff; }
+.btn-primary:hover { filter: brightness(0.9); color: #fff; }
 .btn-secondary { background-color: var(--bs-secondary); border-color: var(--bs-secondary); color: #fff; }
-.btn-secondary:hover { background-color: #5c636a; border-color: #565e64; color: #fff; }
+.btn-secondary:hover { filter: brightness(0.9); color: #fff; }
 .btn-success { background-color: var(--bs-success); border-color: var(--bs-success); color: #fff; }
-.btn-success:hover { background-color: #157347; border-color: #146c43; color: #fff; }
+.btn-success:hover { filter: brightness(0.9); color: #fff; }
 .btn-danger { background-color: var(--bs-danger); border-color: var(--bs-danger); color: #fff; }
-.btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; color: #fff; }
+.btn-danger:hover { filter: brightness(0.9); color: #fff; }
 .btn-info { background-color: var(--bs-info); border-color: var(--bs-info); color: var(--bs-dark);}
-.btn-info:hover { background-color: #31d2f2; border-color: #25cff2; color: var(--bs-dark);}
+.btn-info:hover { filter: brightness(0.9); color: var(--bs-dark);}
 .btn-warning { background-color: var(--bs-warning); border-color: var(--bs-warning); color: var(--bs-dark);}
-.btn-warning:hover { background-color: #ffca2c; border-color: #ffc720; color: var(--bs-dark);}
+.btn-warning:hover { filter: brightness(0.9); color: var(--bs-dark);}
+
+/* ... seus outros estilos de botão ... */
 .btn-outline-danger { border-color: var(--bs-danger); color: var(--bs-danger); }
 .btn-outline-danger:hover { background-color: var(--bs-danger); color: #fff; }
 .btn-outline-secondary { border-color: var(--bs-secondary); color: var(--bs-secondary); }
 .btn-outline-secondary:hover { background-color: var(--bs-secondary); color: #fff; }
 .btn-outline-primary { border-color: var(--bs-primary); color: var(--bs-primary); }
 .btn-outline-primary:hover { background-color: var(--bs-primary); color: #fff; }
-
-
 .btn-lg { padding: 0.75rem 1.5rem; font-size: 1.1rem; border-radius: var(--bs-border-radius-lg); }
 .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: var(--bs-border-radius); }
 
+
 /* --- CARDS --- */
 .card {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--bs-border-color); /* Usa variável */
     border-radius: var(--bs-border-radius-lg);
     margin-bottom: 1.5rem;
     overflow: hidden;
+    background-color: var(--bs-card-bg); /* Usa variável */
 }
 .card-header {
     font-family: var(--bs-heading-font-family);
     font-weight: 600;
-    background-color: #fff;
-    border-bottom: 1px solid #dee2e6;
+    background-color: var(--bs-card-header-bg); /* Usa variável */
+    border-bottom: 1px solid var(--bs-border-color); /* Usa variável */
     padding: 0.75rem 1.25rem;
 }
 .card.bg-success, .card.bg-danger, .card.bg-info, .card.bg-warning {
     color: #fff; border: none;
 }
-.card.bg-info, .card.bg-warning { color: var(--bs-dark); }
+/* Ajustes para cores de texto em cards coloridos */
+.card.bg-info, .card.bg-warning { 
+    color: #212529 !important; /* Força texto escuro */
+}
+[data-bs-theme="dark"] .card.bg-info, 
+[data-bs-theme="dark"] .card.bg-warning { 
+    color: #212529 !important; /* Mantém texto escuro no dark mode */
+}
+[data-bs-theme="dark"] .card.bg-success, 
+[data-bs-theme="dark"] .card.bg-danger { 
+    color: #ffffff !important; /* Mantém texto claro */
+}
+
 
 /* --- FORMULÁRIOS --- */
 .form-label { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: #495057; }
+/* Ajuste da cor do label no modo escuro */
+[data-bs-theme="dark"] .form-label {
+    color: var(--bs-secondary);
+}
+
 .form-control, .form-select {
     border-radius: var(--bs-border-radius);
-    border: 1px solid #ced4da;
+    border: 1px solid var(--bs-border-color); /* Usa variável */
     padding: 0.5rem 0.75rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     font-size: 0.95rem;
+    /* Ajuste de cores para formulários */
+    background-color: var(--bs-form-bg);
+    color: var(--bs-body-color);
 }
 .form-control-lg { padding: 0.6rem 1rem; font-size: 1.1rem; }
 .form-control:focus, .form-select:focus {
     border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
     outline: none;
 }
+/* Cor do placeholder no modo escuro */
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: var(--bs-secondary);
+}
+[data-bs-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
 .form-container { /* Formulários Auth/Categoria */
     max-width: 500px;
     margin: 3rem auto;
-    background: white;
+    background: var(--bs-form-bg); /* Usa variável */
     padding: 2rem;
     border-radius: var(--bs-border-radius-lg);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
@@ -152,12 +260,12 @@ a:hover {
 
 /* --- TABELAS --- */
 .table {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--bs-border-color); /* Usa variável */
     border-radius: var(--bs-border-radius);
     overflow: hidden;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     margin-bottom: 1.5rem;
-    background-color: #fff; /* Fundo branco para a tabela */
+    background-color: var(--bs-table-bg); /* Usa variável */
 }
 .table thead th {
     background-color: var(--bs-dark);
@@ -168,24 +276,30 @@ a:hover {
     font-weight: 600;
     padding: 0.9rem 0.75rem;
     vertical-align: middle;
-    font-size: 0.85rem; /* Reduzido */
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+/* Ajuste de cabeçalho de tabela no modo escuro */
+[data-bs-theme="dark"] .table thead th {
+    background-color: #495057;
+    border-color: #565e64;
+}
+
 .table tbody tr { transition: background-color 0.15s ease-in-out; }
 .table-striped > tbody > tr:nth-of-type(odd) > * {
-    --bs-table-bg-type: var(--bs-light); /* Fundo zebrado mais claro */
-    background-color: var(--bs-table-bg-type); /* Aplica explicitamente */
+    --bs-table-bg-type: var(--bs-table-striped-bg); /* Usa variável */
+    background-color: var(--bs-table-bg-type);
 }
 .table-hover > tbody > tr:hover > * {
     --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.08);
-    background-color: var(--bs-table-bg-state); /* Aplica explicitamente */
+    background-color: var(--bs-table-bg-state);
     color: var(--bs-table-hover-color, inherit);
 }
 .table td {
     padding: 0.75rem;
     vertical-align: middle;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid var(--bs-border-color); /* Usa variável */
     font-size: 0.95rem;
 }
 .table-actions a, .table-actions button { margin: 0 2px; }
@@ -201,6 +315,9 @@ a:hover {
 /* --- DASHBOARD (HOME) --- */
 .dashboard-logo { max-width: 200px; height: auto; display: block; margin: 0 auto 25px auto; opacity: 0.9; }
 .container.mt-4 .lead { font-size: 1.3rem; color: #555; }
+[data-bs-theme="dark"] .container.mt-4 .lead {
+    color: var(--bs-secondary);
+}
 .card .card-title { font-size: 1.1rem; font-weight: 500; }
 .card .card-text { font-size: 2.2rem; font-weight: bold; }
 
@@ -215,38 +332,55 @@ main.container-fluid { padding-left: 30px; padding-right: 30px; }
 
 /* --- RESPONSIVIDADE TABELA --- */
 @media (max-width: 768px) {
-    body { padding-top: 80px; /* Ajuste para logo menor */ }
-    .logo-header-link { top: 10px; right: 10px; padding: 5px; }
+    body { padding-top: 80px; }
+    /* Ajuste de posição dos botões no mobile */
+    .theme-toggle { 
+        top: 10px; 
+        left: 10px; 
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    .logo-header-link { 
+        top: 10px; 
+        right: 10px; 
+        padding: 5px; 
+    }
     .logo-header-image { width: 80px; }
+    
     main.container-fluid { padding-left: 15px; padding-right: 15px; }
 
-    .table thead { display: none; } /* Esconde cabeçalho */
-    .table tbody, .table tr, .table td { display: block; width: 100%; } /* Transforma em blocos */
-    .table tr { margin-bottom: 1rem; border: 1px solid #dee2e6; border-radius: var(--bs-border-radius); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .table thead { display: none; }
+    .table tbody, .table tr, .table td { display: block; width: 100%; }
+    .table tr { 
+        margin-bottom: 1rem; 
+        border: 1px solid var(--bs-border-color); /* Usa variável */
+        border-radius: var(--bs-border-radius); 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    }
     .table td {
-        text-align: right; /* Alinha valor à direita */
-        padding-left: 50%; /* Espaço para o label */
+        text-align: right;
+        padding-left: 50%;
         position: relative;
         border: none;
-        border-bottom: 1px solid #eee; /* Linha entre campos */
-        min-height: 40px; /* Altura mínima */
-        display: flex; /* Alinha label e valor */
+        border-bottom: 1px solid var(--bs-border-color); /* Usa variável */
+        min-height: 40px;
+        display: flex;
         align-items: center;
         justify-content: flex-end;
     }
     .table td::before {
-        content: attr(data-label); /* Pega o texto do data-label */
+        content: attr(data-label);
         position: absolute;
         left: 10px;
-        width: 45%; /* Largura do label */
+        width: 45%;
         padding-right: 10px;
         white-space: nowrap;
         text-align: left;
         font-weight: bold;
         font-size: 0.85rem;
-        color: var(--bs-secondary); /* Cor do label */
+        color: var(--bs-secondary); /* Usa variável */
     }
-    .table td:last-child { border-bottom: none; } /* Remove última linha */
-    .table-actions { text-align: right !important; padding-left: 10px !important; justify-content: flex-end;} /* Ajusta ações */
-    /* .table-actions::before { content: "Ações" !important; } /* Label para ações */
+    .table td:last-child { border-bottom: none; }
+    .table-actions { text-align: right !important; padding-left: 10px !important; justify-content: flex-end;}
 }

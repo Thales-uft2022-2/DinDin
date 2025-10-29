@@ -53,11 +53,12 @@ $routes = [
     'transactions/update'    => ['TransactionsController', 'update'],
     'transactions/delete'    => ['TransactionsController', 'delete'],
 
-    // --- Rotas WEB de Categorias (NOVAS - US-Cat-01) ---
-    'categories'             => ['CategoryController', 'index'], //<-- (NOVA ROTA US-Cat-02) Lista as categorias
+    // --- Rotas WEB de Categorias  ---
+    'categories'             => ['CategoryController', 'index'], //<-- (US-Cat-02) Lista as categorias
     'categories/create'      => ['CategoryController', 'create'], // Mostra o formulário
     'categories/store'       => ['CategoryController', 'store'],  // Processa o formulário
-
+    'categories/edit'        => ['CategoryController', 'edit'],   // <-- ( US-Cat-03)
+    'categories/update'      => ['CategoryController', 'update'], // <-- ( US-Cat-03)
     // --- APIs de Transações ---
     'api/transactions/create' => ['TransactionsController', 'apiCreate'], // TS-Svc-01
     'api/transactions'        => ['TransactionsController', 'apiIndex'],  // TS-Svc-02
