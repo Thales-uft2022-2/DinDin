@@ -68,7 +68,27 @@ class CategoryModel {
         ]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-
-    // --- Métodos findAllByUserId, findById, update, delete virão nas próximas US (Cat-02, 03, 04) ---
+/**
+     * Busca todas as categorias de um utilizador específico.
+     * (US-Cat-02)
+     *
+     * @param int $userId ID do utilizador.
+     * @return array Retorna uma lista de categorias.
+     */
+    public function findAllByUserId(int $userId): array
+    {
+        // Ordena por tipo (para agrupar receitas/despesas) e depois por nome
+        $sql = "SELECT * FROM categories 
+                WHERE user_id = :user_id 
+                ORDER BY type, name";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':user_id' => $userId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("CategoryModel::findAllByUserId Error: " . $e->getMessage());
+            return []; // Retorna lista vazia em caso de erro
+        }
+    }
 
 }

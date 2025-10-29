@@ -58,7 +58,8 @@
         </div>
          <div class="col-md-5 mt-3">
              <div class="d-grid">
-                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-warning btn-lg py-3 text-dark"> <i class="bi bi-tags-fill me-2"></i> Gerir Categorias
+                <a href="<?= BASE_URL ?>/categories" class="btn btn-warning btn-lg py-3 text-dark"> 
+                    <i class="bi bi-tags-fill me-2"></i> Gerir Categorias
                 </a>
              </div>
         </div>

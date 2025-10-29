@@ -22,6 +22,23 @@ class CategoryController
         // Instancia o serviço
         $this->categoryService = new CategoryService();
     }
+    
+    /**
+     * Exibe a lista de categorias do utilizador.
+     * Rota: GET /categories
+     * (US-Cat-02)
+     */
+    public function index()
+    {
+        // 1. Pega o ID do utilizador logado
+        $userId = $_SESSION['user']['id'];
+
+        // 2. Busca as categorias usando o serviço
+        $categories = $this->categoryService->getCategoriesByUser($userId);
+
+        // 3. Carrega a view da lista, passando as categorias
+        include __DIR__ . '/../views/categories/index.php';
+    }
 
     /**
      * Exibe o formulário para criar uma nova categoria.
@@ -63,13 +80,11 @@ class CategoryController
         // 4. Trata o resultado
         if ($result['success']) {
             // Sucesso: Define uma mensagem flash e redireciona para a lista de categorias
-            // (Ainda não temos a lista, então redirecionaremos para o form por enquanto, com msg)
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'message' => $result['message']
             ];
-            // header('Location: ' . BASE_URL . '/categories'); // <-- Rota futura da lista
-            header('Location: ' . BASE_URL . '/categories/create'); // <-- Redireciona de volta ao form por agora
+            header('Location: ' . BASE_URL . '/categories');
             exit;
         } else {
             // Erro: Guarda os erros, os dados antigos, e recarrega a view do formulário
@@ -83,6 +98,5 @@ class CategoryController
         }
     }
 
-    // --- Métodos index (listar), edit, update, delete virão aqui (US-Cat-02, 03, 04) ---
-
+// --- Métodos edit, update, delete virão aqui (US-Cat-03, 04) ---
 }

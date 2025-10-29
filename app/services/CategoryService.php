@@ -72,6 +72,17 @@ class CategoryService
         }
     }
 
-    // --- Métodos para Listar, Editar, Excluir virão aqui (US-Cat-02, 03, 04) ---
-
+    /**
+     * Busca todas as categorias de um utilizador.
+     * (US-Cat-02)
+     *
+     * @param int $userId ID do utilizador.
+     * @return array Lista de categorias.
+     */
+    public function getCategoriesByUser(int $userId): array
+    {
+        // Por enquanto, apenas repassa a chamada ao Model
+        // Lógica de negócio (ex: paginação) poderia ser adicionada aqui
+        return $this->categoryModel->findAllByUserId($userId);
+    }
 }
