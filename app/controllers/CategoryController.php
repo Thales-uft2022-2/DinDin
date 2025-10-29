@@ -97,6 +97,87 @@ class CategoryController
             include __DIR__ . '/../views/categories/create.php';
         }
     }
+    /**
+     * Exibe o formulário para editar uma categoria.
+     * Rota: GET /categories/edit
+     * (US-Cat-03)
+     */
+    public function edit()
+    {
+        // 1. Pegar ID do GET e ID do utilizador
+        $categoryId = (int) ($_GET['id'] ?? 0);
+        $userId = $_SESSION['user']['id'];
+        
+        if (!$categoryId) {
+            // Se não tem ID, redireciona para a lista
+            header('Location: ' . BASE_URL . '/categories');
+            exit;
+        }
 
-// --- Métodos edit, update, delete virão aqui (US-Cat-03, 04) ---
+        // 2. Buscar a categoria no serviço (que verifica a posse)
+        $category = $this->categoryService->getCategoryById($categoryId, $userId);
+
+        // 3. Verificar se a categoria existe e pertence ao utilizador
+        if (!$category) {
+            // Se não encontrou ou não pertence, define erro e vai para a lista
+            $_SESSION['flash_message'] = [
+                'type' => 'error',
+                'message' => 'Categoria não encontrada ou acesso negado.'
+            ];
+            header('Location: ' . BASE_URL . '/categories');
+            exit;
+        }
+        
+        // 4. Carrega a view do formulário de edição, passando os dados
+        // Usamos $oldData para que a view de edição possa reutilizar a mesma lógica
+        // da view de criação ('create.php') caso dê erro no 'update'
+        $oldData = $category; 
+        include __DIR__ . '/../views/categories/edit.php';
+    }
+
+    /**
+     * Processa o envio do formulário de edição de categoria.
+     * Rota: POST /categories/update
+     * (US-Cat-03)
+     */
+    public function update()
+    {
+        // Garante que é um POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/categories');
+            exit;
+        }
+        // 1. Pega os dados do POST e o ID do utilizador
+        $userId = $_SESSION['user']['id'];
+
+        $categoryId = (int) ($_POST['id'] ?? 0);
+        $data = [
+            'name' => $_POST['name'] ?? '',
+            'type' => $_POST['type'] ?? ''
+        ];
+
+        // 2. Chama o Serviço para ATUALIZAR a categoria
+        $result = $this->categoryService->updateCategory($categoryId, $userId, $data);
+
+        // 3. Trata o resultado
+        if ($result['success']) {
+            // Sucesso: Define mensagem flash e redireciona para a lista (Critério Aceite 1)
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => $result['message']
+            ];
+            header('Location: ' . BASE_URL . '/categories');
+            exit;
+        } else {
+            // Erro: Guarda os erros, os dados antigos (com o ID) e recarrega a view de EDIÇÃO (Critério Aceite 2)
+            $errors = $result['errors'];
+            $oldData = $data;
+            $oldData['id'] = $categoryId; // Garante que o ID está presente para o form
+            $_SESSION['flash_message'] = [ // Adiciona mensagem de erro flash
+                'type' => 'error',
+                'message' => 'Erro ao atualizar categoria. Verifique os campos.'
+            ];
+            include __DIR__ . '/../views/categories/edit.php';
+        }
+    }
 }
