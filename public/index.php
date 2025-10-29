@@ -54,6 +54,7 @@ $routes = [
     'transactions/delete'    => ['TransactionsController', 'delete'],
 
     // --- Rotas WEB de Categorias (NOVAS - US-Cat-01) ---
+    'categories'             => ['CategoryController', 'index'], //<-- (NOVA ROTA US-Cat-02) Lista as categorias
     'categories/create'      => ['CategoryController', 'create'], // Mostra o formulário
     'categories/store'       => ['CategoryController', 'store'],  // Processa o formulário
 
