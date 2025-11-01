@@ -2,7 +2,7 @@
 
 <div class="container mt-4">
     <div class="text-center mb-5">
-        <img src="<?= BASE_URL ?>/images/DinDin_Logo_Option2.jpg" alt="Logo DinDin" class="dashboard-logo">
+        <img src="<?= BASE_URL ?>/images/DinDin_Logo_Option2.png" alt="Logo DinDin" class="dashboard-logo">
         <h1 class="display-4 fw-bold mb-3">Seu Dashboard Financeiro 📊</h1>
         <p class="lead"> Olá, <?= htmlspecialchars($_SESSION['user']['name'] ?? 'Utilizador') ?>!
             Aqui está o seu resumo financeiro para o mês de <span class="fw-bold"><?= date('m/Y') ?></span>.
