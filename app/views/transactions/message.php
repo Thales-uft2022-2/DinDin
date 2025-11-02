@@ -19,4 +19,3 @@ include_once __DIR__ . '/../_header.php';
 // Inclui o footer para fechar o HTML e carregar os scripts do tema
 include_once __DIR__ . '/../_footer.php';
 ?>
-

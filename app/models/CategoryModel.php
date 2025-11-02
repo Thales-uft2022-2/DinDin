@@ -30,6 +30,7 @@ class CategoryModel {
             return false;
         } catch (PDOException $e) {
             if ($e->getCode() == '23000' || $e->getCode() == 1062) {
+                // Categoria duplicada para o mesmo usuário
                 return false; 
             } else {
                 error_log("CategoryModel::create Error: " . $e->getMessage());
@@ -74,6 +75,28 @@ class CategoryModel {
     }
 
     /**
+     * Busca categorias de um tipo específico (income/expense).
+     * Usado ao criar ou editar transações.
+     */
+    public function getCategoriesByType(int $userId, string $type): array
+    {
+        $sql = "SELECT id, name FROM categories 
+                WHERE user_id = :user_id AND type = :type 
+                ORDER BY name";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':type'    => $type
+            ]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("CategoryModel::getCategoriesByType Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Busca uma categoria específica pelo seu ID e ID do utilizador.
      * (US-Cat-03)
      */
@@ -113,6 +136,7 @@ class CategoryModel {
             ]);
         } catch (PDOException $e) {
             if ($e->getCode() == '23000' || $e->getCode() == 1062) {
+                // Categoria duplicada
                 return false;
             } else {
                 error_log("CategoryModel::update Error: " . $e->getMessage());
