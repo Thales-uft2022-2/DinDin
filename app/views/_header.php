@@ -46,7 +46,7 @@
     
     <!-- Seu logo existente -->
     <a href="<?= BASE_URL ?>/home" class="logo-header-link shadow-sm">
-        <img src="<?= BASE_URL ?>/images/logo_header.jpg" alt="DinDin Home" class="logo-header-image">
+        <img src="<?= BASE_URL ?>/images/DinDin_Logo_Option2.png" alt="DinDin Home" class="logo-header-image">
     </a>
 
     <main class="container py-4">

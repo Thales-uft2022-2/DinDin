@@ -1,119 +1,130 @@
 <?php
 
-// ===== ADICIONE ESTAS DUAS LINHAS PARA DEBUG =====
+// ===== DEBUG MODE =====
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-// =================================================
+// ======================
 
+// Configurações e autoload
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
+
+// Autoload customizado
 spl_autoload_register(function ($class) {
     $paths = [
         __DIR__ . '/../app/controllers/',
         __DIR__ . '/../app/models/',
         __DIR__ . '/../app/core/',
-        __DIR__ . '/../app/services/' // Garante que o autoloader do Service está aqui
+        __DIR__ . '/../app/services/'
     ];
 
     foreach ($paths as $path) {
         $file = $path . $class . '.php';
-        if (file_exists($file)) { require_once $file; return; }
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
     }
 });
 
-// Inicia sessão (se não estiver ativa)
+// Inicia a sessão (caso ainda não tenha sido iniciada)
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-// Rota atual (sem a BASE_URL)
+// Captura e trata a URL atual
 $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// Tabela de rotas explícitas (COM ROTAS DE CATEGORIA ADICIONADAS)
+// ============================================================
+// 🔗 DEFINIÇÃO DAS ROTAS DO SISTEMA
+// ============================================================
 $routes = [
-    // --- Rotas Principais ---
-    'home'                   => ['HomeController', 'index'],
 
-    // --- Rotas WEB de Autenticação ---
-    'auth/login'             => ['AuthController', 'login'],
-    'auth/logout'            => ['AuthController', 'logout'],
-    'auth/register'          => ['AuthController', 'register'],
-    'auth/forgot-password'   => ['AuthController', 'forgotPassword'],
-    'auth/send-reset-link'   => ['AuthController', 'sendResetLink'],
-    'auth/reset-password'    => ['AuthController', 'resetPassword'],
-    'auth/update-password'   => ['AuthController', 'updatePassword'],
+    // --------- TELA INICIAL ---------
+    ''                      => ['HomeController', 'index'],
+    'home'                  => ['HomeController', 'index'],
 
-    // --- Rotas WEB de Transações ---
-    'transactions'           => ['TransactionsController', 'index'],
-    'transactions/create'    => ['TransactionsController', 'create'],
-    'transactions/store'     => ['TransactionsController', 'store'],
-    'transactions/edit'      => ['TransactionsController', 'edit'],
-    'transactions/update'    => ['TransactionsController', 'update'],
-    'transactions/delete'    => ['TransactionsController', 'delete'],
+    // --------- AUTENTICAÇÃO ---------
+    'auth/login'            => ['AuthController', 'login'],
+    'auth/register'         => ['AuthController', 'register'],
+    'auth/logout'           => ['AuthController', 'logout'],
+    'auth/forgot-password'  => ['AuthController', 'forgotPassword'],
+    'auth/send-reset-link'  => ['AuthController', 'sendResetLink'],
+    'auth/reset-password'   => ['AuthController', 'resetPassword'],
+    'auth/update-password'  => ['AuthController', 'updatePassword'],
 
-    // --- Rotas WEB de Categorias  ---
-    'categories'             => ['CategoryController', 'index'], //<-- (US-Cat-02) Lista as categorias
-    'categories/create'      => ['CategoryController', 'create'], // Mostra o formulário
-    'categories/store'       => ['CategoryController', 'store'],  // Processa o formulário
-    'categories/edit'        => ['CategoryController', 'edit'],   // <-- ( US-Cat-03)
-    'categories/update'      => ['CategoryController', 'update'], // <-- ( US-Cat-03)
-    // --- APIs de Transações ---
-    'api/transactions/create' => ['TransactionsController', 'apiCreate'], // TS-Svc-01
-    'api/transactions'        => ['TransactionsController', 'apiIndex'],  // TS-Svc-02
-    'api/transactions/update' => ['TransactionsController', 'apiUpdate'], // TS-Svc-03
-    'api/transactions/delete' => ['TransactionsController', 'apiDelete'], // TS-Svc-04
+    // --------- USUÁRIO ---------
+    'user/store'            => ['UserController', 'store'],
 
-    // --- APIs de Autenticação ---
-    'api/auth/register'       => ['AuthController', 'apiRegister'],       // TS-Auth-01
-    'api/auth/login'          => ['AuthController', 'apiLogin'],          // TS-Auth-02
-    'api/auth/logout'         => ['AuthController', 'apiLogout'],         // TS-Auth-03
-    'api/auth/forgot-password'=> ['AuthController', 'apiForgotPassword'], // TS-Auth-04
-    'api/auth/reset-password' => ['AuthController', 'apiResetPassword'],  // TS-Auth-04
+    // --------- TRANSAÇÕES ---------
+    'transactions'          => ['TransactionsController', 'index'],
+    'transactions/create'   => ['TransactionsController', 'create'],
+    'transactions/store'    => ['TransactionsController', 'store'],
+    'transactions/edit'     => ['TransactionsController', 'edit'],
+    'transactions/update'   => ['TransactionsController', 'update'],
+    'transactions/delete'   => ['TransactionsController', 'delete'],
 
-    // --- APIs de Categorias (VIRÃO NAS PRÓXIMAS TAREFAS) ---
-    // 'api/categories'       => ['CategoryController', 'apiIndex'], // Ex: Listar
-    // 'api/categories/store'   => ['CategoryController', 'apiStore'], // Ex: Criar via API
-    // ... etc ...
+    // --------- CATEGORIAS ---------
+    'categories'            => ['CategoryController', 'index'],   // Listar
+    'categories/create'     => ['CategoryController', 'create'],  // Criar
+    'categories/store'      => ['CategoryController', 'store'],   // Salvar
+    'categories/edit'       => ['CategoryController', 'edit'],    // Editar
+    'categories/update'     => ['CategoryController', 'update'],  // Atualizar
+    'categories/delete'     => ['CategoryController', 'delete'],  // Excluir (Sprint 4)
+
+    // --------- API: TRANSAÇÕES ---------
+    'api/transactions'         => ['TransactionsController', 'apiIndex'],
+    'api/transactions/create'  => ['TransactionsController', 'apiCreate'],
+    'api/transactions/update'  => ['TransactionsController', 'apiUpdate'],
+    'api/transactions/delete'  => ['TransactionsController', 'apiDelete'],
+
+    // --------- API: AUTENTICAÇÃO ---------
+    'api/auth/register'        => ['AuthController', 'apiRegister'],
+    'api/auth/login'           => ['AuthController', 'apiLogin'],
+    'api/auth/logout'          => ['AuthController', 'apiLogout'],
+    'api/auth/forgot-password' => ['AuthController', 'apiForgotPassword'],
+    'api/auth/reset-password'  => ['AuthController', 'apiResetPassword'],
+
+    // --------- API: CATEGORIAS ---------
+    'api/categories'           => ['CategoryController', 'apiIndex'],
+    'api/categories/store'     => ['CategoryController', 'apiStore'],
+    'api/categories/update'    => ['CategoryController', 'apiUpdate'],
+    'api/categories/delete'    => ['CategoryController', 'apiDelete'],
 ];
 
-// Rota padrão (somente a raiz vai para login)
+// ============================================================
+// 🚀 RESOLUÇÃO DAS ROTAS
+// ============================================================
 if ($path === '') {
-    [$controllerName, $action] = $routes['auth/login'];
+    [$controllerName, $action] = $routes[''];
 } elseif (isset($routes[$path])) {
     [$controllerName, $action] = $routes[$path];
 } else {
-    // fallback dinâmico: /controller/action
-    // Tenta encontrar /controller/action (ex: /categories/index chamaria CategoryController->index())
+    // fallback dinâmico /controller/action
     $parts = explode('/', $path, 2);
     $ctrl = $parts[0];
-    $action = $parts[1] ?? 'index'; // Ação padrão é 'index' se não for especificada
-    $controllerName  = ucfirst($ctrl) . 'Controller';
+    $action = $parts[1] ?? 'index';
+    $controllerName = ucfirst($ctrl) . 'Controller';
 
-    // Verifica se o controller/action dinâmico existe ANTES de dar 404
     if (!class_exists($controllerName) || !method_exists($controllerName, $action)) {
-         // Se não encontrar nem na tabela $routes nem dinamicamente, dá 404
-         http_response_code(404);
-         echo "<h1>404 - Rota não encontrada</h1><p>A rota solicitada '/{$path}' não foi encontrada.</p>";
-         exit; // Termina a execução
+        http_response_code(404);
+        echo "<h1>404 - Página não encontrada</h1>";
+        echo "<p>Rota: /{$path}</p>";
+        exit;
     }
 }
 
-// Dispara a action do controller correspondente
+// ============================================================
+// ⚙️ EXECUÇÃO DO CONTROLLER
+// ============================================================
 try {
-    // Cria a instância do controller e chama a ação
     $controllerInstance = new $controllerName();
     $controllerInstance->$action();
 } catch (Throwable $e) {
-    // Captura erros gerais durante a execução do controller/action
-    error_log("Erro ao executar rota '/{$path}': " . $e->getMessage() . "\n" . $e->getTraceAsString());
-    http_response_code(500); // Erro interno do servidor
-    // Em produção, mostrar uma página de erro genérica. Em dev, pode mostrar detalhes.
-    echo "<h1>Erro 500 - Erro Interno do Servidor</h1>";
-    if (ini_get('display_errors')) { // Mostra detalhes apenas se display_errors estiver ativo
-        echo "<pre>Erro: " . htmlspecialchars($e->getMessage()) . "\n" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-    } else {
-        echo "<p>Ocorreu um erro inesperado. Tente novamente mais tarde.</p>";
-    }
+    error_log("Erro na rota '/{$path}': " . $e->getMessage());
+    http_response_code(500);
+    echo "<h1>Erro interno (500)</h1>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
 }
