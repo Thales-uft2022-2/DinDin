@@ -1,107 +1,124 @@
-<?php include_once __DIR__ . '/../_header.php'; // Inclui o topo (<html>, <head>, <body>, logo) ?>
+<?php include_once __DIR__ . '/../_header.php'; ?>
 
-<h1>Lista de Transações</h1>
+<div class="container my-4">
 
-<div class="search-container" id="search-container">
-    <h2>🔍 Filtros de Busca</h2>
-    <form method="get" action="<?= BASE_URL ?>/transactions/index">
-        <div class="filter-row">
-            <label>
-                Tipo:
-                <select name="type">
-                    <option value="">Todos os tipos</option>
-                    <option value="income" <?= ($_GET['type'] ?? '') === 'income' ? 'selected' : '' ?>>📈 Receita</option>
-                    <option value="expense" <?= ($_GET['type'] ?? '') === 'expense' ? 'selected' : '' ?>>📉 Despesa</option>
-                </select>
-            </label>
-            
-            <label>
-                Categoria:
-                <input type="text" name="category" list="categories" 
-                    value="<?= htmlspecialchars($_GET['category'] ?? '') ?>"
-                    placeholder="Digite uma categoria">
-                <datalist id="categories">
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?= htmlspecialchars($cat) ?>">
-                    <?php endforeach; ?>
-                </datalist>
-            </label>
-            
-            <label>
-                Descrição:
-                <input type="text" name="description" 
-                    value="<?= htmlspecialchars($_GET['description'] ?? '') ?>"
-                    placeholder="Buscar na descrição">
-            </label>
+  <h1 class="fw-bold mb-4 text-light-emphasis">Lista de Transações</h1>
+
+  <div class="card shadow-sm mb-4" 
+       style="background-color: var(--bs-body-bg); color: var(--bs-body-color); border: 1px solid var(--bs-border-color-translucent);">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-3 text-body">Filtros de Busca</h5>
+
+      <form method="GET" action="<?= BASE_URL ?>/transactions" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Tipo:</label>
+          <select name="type" class="form-select">
+            <option value="">Todos</option>
+            <option value="income" <?= ($filters['type'] ?? '') === 'income' ? 'selected' : '' ?>>Receita</option>
+            <option value="expense" <?= ($filters['type'] ?? '') === 'expense' ? 'selected' : '' ?>>Despesa</option>
+          </select>
         </div>
-        
-        <div class="filter-row">
-            <label>
-                Data Início:
-                <input type="date" name="start_date" 
-                    value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>">
-            </label>
-            
-            <label>
-                Data Fim:
-                <input type="date" name="end_date" 
-                    value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>">
-            </label>
-            
-            <div style="display: flex; gap: 10px; align-items: flex-end;">
-                <button type="submit" class="btn primary">🔍 Filtrar</button>
-                <a href="<?= BASE_URL ?>/transactions/index" class="btn secondary">🗑️ Limpar</a>
-            </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Categoria:</label>
+          <input type="text" name="category" class="form-control" placeholder="Digite ou selecione"
+                 value="<?= htmlspecialchars($filters['category'] ?? '') ?>">
         </div>
-    </form>
-</div>    
-<div class="results-info">
-    <p>Encontradas: <strong><?= count($transactions) ?></strong> transação(ões)</p>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Descrição:</label>
+          <input type="text" name="description" class="form-control" placeholder="Buscar na descrição"
+                 value="<?= htmlspecialchars($filters['description'] ?? '') ?>">
+        </div>
+
+        <div class="col-md-3 text-end">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> Filtrar
+          </button>
+          <a href="<?= BASE_URL ?>/transactions" class="btn btn-secondary">
+            <i class="bi bi-eraser"></i> Limpar
+          </a>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Data Início:</label>
+          <input type="date" name="start_date" class="form-control"
+                 value="<?= htmlspecialchars($filters['start_date'] ?? '') ?>">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Data Fim:</label>
+          <input type="date" name="end_date" class="form-control"
+                 value="<?= htmlspecialchars($filters['end_date'] ?? '') ?>">
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <p class="text-secondary mb-3">
+    Encontradas: <?= count($transactions) ?> transação(ões)
+  </p>
+
+  <div class="d-flex justify-content-end mb-3">
+    <a href="<?= BASE_URL ?>/transactions/create" class="btn btn-success">
+      <i class="bi bi-plus-circle"></i> Nova Transação
+    </a>
+  </div>
+
+  <div class="table-responsive shadow-sm rounded">
+    <table class="table table-hover align-middle"
+           style="background-color: var(--bs-body-bg); color: var(--bs-body-color); border: 1px solid var(--bs-border-color-translucent);">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>#</th>
+          <th>Tipo</th>
+          <th>Categoria</th>
+          <th>Descrição</th>
+          <th>Valor (R$)</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody class="text-center">
+        <?php if (empty($transactions)): ?>
+          <tr>
+            <td colspan="7" class="text-muted py-3">Nenhuma transação encontrada.</td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($transactions as $t): ?>
+            <tr>
+              <td><?= htmlspecialchars($t['id']) ?></td>
+              <td>
+                <?php if ($t['type'] === 'income'): ?>
+                  <span class="badge bg-success"><i class="bi bi-arrow-up-circle"></i> Receita</span>
+                <?php else: ?>
+                  <span class="badge bg-danger"><i class="bi bi-arrow-down-circle"></i> Despesa</span>
+                <?php endif; ?>
+              </td>
+              <td><?= htmlspecialchars($t['category']) ?></td>
+              <td><?= htmlspecialchars($t['description']) ?></td>
+              <td class="<?= $t['type'] === 'income' ? 'text-success' : 'text-danger' ?>">
+                <?= $t['type'] === 'income' ? '+ R$ ' : '- R$ ' ?><?= number_format($t['amount'], 2, ',', '.') ?>
+              </td>
+              <td><?= date('d/m/Y', strtotime($t['date'])) ?></td>
+              <td>
+                <a href="<?= BASE_URL ?>/transactions/edit?id=<?= $t['id'] ?>" class="btn btn-sm btn-primary">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <a href="<?= BASE_URL ?>/transactions/delete?id=<?= $t['id'] ?>" 
+                   class="btn btn-sm btn-danger" 
+                   onclick="return confirm('Tem certeza que deseja excluir esta transação?');">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Categoria</th>
-            <th>Descrição</th>
-            <th>Valor (R$)</th>
-            <th>Data</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($transactions)): ?>
-            <tr>
-                <td colspan="7" style="text-align: center;">Nenhuma transação encontrada</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($transactions as $t): ?>
-                <tr>
-                    <td><?= htmlspecialchars($t['id']) ?></td>
-                    <td>
-                        <span class="badge <?= $t['type'] === 'income' ? 'badge-income' : 'badge-expense' ?>">
-                            <?= $t['type'] === 'income' ? '📈 Receita' : '📉 Despesa' ?>
-                        </span>
-                    </td>
-                    <td><?= htmlspecialchars($t['category']) ?></td>
-                    <td><?= htmlspecialchars($t['description']) ?></td>
-                    <td class="<?= $t['type'] === 'income' ? 'text-income' : 'text-expense' ?>">
-                        R$ <?= number_format($t['amount'], 2, ',', '.') ?>
-                    </td>
-                    <td><?= date('d/m/Y', strtotime($t['date'])) ?></td>
-                    <td class="table-actions">
-                        <a href="<?= BASE_URL ?>/transactions/edit?id=<?= $t['id'] ?>">Editar</a> |
-                        <a href="<?= BASE_URL ?>/transactions/delete?id=<?= $t['id'] ?>" 
-                           onclick="return confirm('Tem certeza que deseja excluir esta transação?')">Excluir</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>
-
-<p><a href="<?= BASE_URL ?>/transactions/create">➕ Nova Transação</a></p>
-
-<?php include_once __DIR__ . '/../_footer.php'; // Inclui o rodapé (</body>, </html>) ?>
+<?php include_once __DIR__ . '/../_footer.php'; ?>

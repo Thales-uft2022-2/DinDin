@@ -27,7 +27,7 @@ CREATE TABLE `transactions` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT NOT NULL,
   `type` ENUM('income', 'expense') NOT NULL,
-  `category` VARCHAR(100) NOT NULL,
+  `category` VARCHAR(100) NOT NULL, -- OBS: Esta coluna será ALTERADA/REMOVIDA quando integrarmos US-Cat-02/US-Tx-06
   `description` VARCHAR(255),
   `amount` DECIMAL(10, 2) NOT NULL,
   `date` DATE NOT NULL,
@@ -39,10 +39,42 @@ CREATE TABLE `transactions` (
   INDEX `idx_category` (`category`)
 );
 
--- Inserir usuário de exemplo (senha: "senha123" hash)
-INSERT INTO `users` (`email`, `password`, `name`, `email_verified`)
-VALUES ('usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Usuário Exemplo', TRUE);
+-- Tabela de Categorias (NOVA - Sprint 4 / US-Cat-01)
+CREATE TABLE `categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL COMMENT 'Chave estrangeira para a tabela users',
+  `name` VARCHAR(100) NOT NULL COMMENT 'Nome da categoria (ex: Alimentação)',
+  `type` ENUM('income', 'expense') NOT NULL COMMENT 'Tipo da categoria (Receita ou Despesa)',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
--- Atualizar transações existentes para associar ao usuário
-INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
-VALUES (1, 'expense', 'moradia', 'Aluguel', 1.20, '2025-09-16');
+  -- Chave estrangeira ligando ao utilizador
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+
+  -- Índice para garantir que um utilizador não repita nome e tipo de categoria
+  UNIQUE KEY `uq_user_category_name_type` (`user_id`, `name`, `type`),
+
+  -- Índices adicionais para performance
+  INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_type` (`type`)
+) COMMENT 'Armazena as categorias personalizadas dos utilizadores';
+
+
+-- --- DADOS DE EXEMPLO ---
+
+-- Inserir usuário de exemplo (senha: "senha123" hash)
+-- Certifique-se de que o ID deste usuário seja 1 para os exemplos abaixo funcionarem
+INSERT INTO `users` (`id`, `email`, `password`, `name`, `email_verified`)
+VALUES (1, 'usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Usuário Exemplo', TRUE)
+ON DUPLICATE KEY UPDATE email = email; -- Evita erro se o usuário 1 já existir
+
+-- Atualizar transações existentes para associar ao usuário 1 (se existirem)
+-- Atenção: O INSERT abaixo SÓ funciona se a tabela transactions estiver VAZIA.
+-- Se já tiver dados, use UPDATE ou adicione novas transações.
+-- Exemplo de INSERT (apenas para base limpa):
+-- INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
+-- VALUES (1, 'expense', 'Moradia', 'Aluguel', 1200.00, '2025-10-05'),
+--        (1, 'income', 'Salário', 'Pagamento Outubro', 5000.00, '2025-10-01');
+
+-- (Você pode adicionar INSERTs para categorias padrão se desejar)
+-- INSERT INTO `categories` (`user_id`, `name`, `type`) VALUES (1, 'Salário', 'income'), (1, 'Moradia', 'expense'), (1, 'Alimentação', 'expense');
