@@ -57,15 +57,12 @@ $routes = [
 
     // --------- USUÁRIO E PERFIL ---------
     'user/store' => ['UserController', 'store'],
-    'profile' => ['UserController', 'profile'],                  // (US-Profile-01) GET - Mostrar página de perfil
-    'profile/update' => ['UserController', 'updateProfile'],        // (US-Profile-01) POST - Atualizar nome
-    'profile/update-avatar' => ['UserController', 'updateAvatar'],    // (US-Profile-01) POST - Atualizar foto
-    
-    // ▼▼▼ NOVA ROTA PARA APAGAR AVATAR ▼▼▼
-    'profile/delete-avatar' => ['UserController', 'deleteAvatar'],    // (US-Profile-01) POST - Apagar foto
-    
-    'profile/password' => ['UserController', 'showChangePasswordForm'], // (US-Profile-02) GET - Mostrar pág. de senha
-    'profile/change-password' => ['UserController', 'changePassword'],  // (US-Profile-02) POST - Atualizar senha
+    'profile' => ['UserController', 'profile'],
+    'profile/update' => ['UserController', 'updateProfile'],
+    'profile/update-avatar' => ['UserController', 'updateAvatar'],
+    'profile/delete-avatar' => ['UserController', 'deleteAvatar'],
+    'profile/password' => ['UserController', 'showChangePasswordForm'],
+    'profile/change-password' => ['UserController', 'changePassword'],
 
     // --------- TRANSAÇÕES ---------
     'transactions' => ['TransactionsController', 'index'],
@@ -83,7 +80,11 @@ $routes = [
     'categories/update' => ['CategoryController', 'update'],
     'categories/delete' => ['CategoryController', 'delete'],
 
-    // --------- API (Seu código original) ---------
+    // --------- ADMIN (NOVO) ---------
+    'admin' => ['AdminController', 'index'],
+    'admin/update' => ['AdminController', 'update'],
+
+    // --------- API ---------
     'api/transactions' => ['TransactionsController', 'apiIndex'],
     'api/transactions/create' => ['TransactionsController', 'apiCreate'],
     'api/transactions/update' => ['TransactionsController', 'apiUpdate'],

@@ -7,8 +7,11 @@ class UserModel {
         $this->db = Database::getConnection();
     }
 
+    /* ==========================================================
+     *   MÉTODOS EXISTENTES (LOGIN / PERFIL / RESET)
+     * ========================================================== */
+
     public function findByEmail(string $email): ?array {
-        // Seleciona o avatar também
         $stmt = $this->db->prepare('SELECT id, email, password, name, avatar FROM users WHERE email = :email');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
@@ -16,8 +19,7 @@ class UserModel {
     }
 
     public function findByEmailAndPassword(string $email, string $password): ?array {
-        // Seleciona o avatar também
-        $stmt = $this->db->prepare('SELECT id, email, password, name, avatar FROM users WHERE email = :email AND provider = "email"');
+        $stmt = $this->db->prepare('SELECT id, email, password, name, avatar, role, status FROM users WHERE email = :email AND provider = "email"');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password'])) {
@@ -27,12 +29,12 @@ class UserModel {
         return null;
     }
 
-    public function create(string $name, string $email, string $password)
-    {
+    public function create(string $name, string $email, string $password) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         try {
             $stmt = $this->db->prepare(
-                'INSERT INTO users (name, email, password, provider) VALUES (:name, :email, :password, "email")'
+                'INSERT INTO users (name, email, password, provider, role, status) 
+                 VALUES (:name, :email, :password, "email", "user", "pending")'
             );
             $success = $stmt->execute([
                 'name' => $name,
@@ -43,6 +45,7 @@ class UserModel {
                 return $this->db->lastInsertId();
             }
             return false;
+
         } catch (PDOException $e) {
             error_log("Erro ao criar usuário: " . $e->getMessage());
             return false;
@@ -77,8 +80,7 @@ class UserModel {
         ]);
     }
 
-    public function updateName(int $userId, string $name): bool
-    {
+    public function updateName(int $userId, string $name): bool {
         $sql = "UPDATE users SET name = :name, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
@@ -92,14 +94,12 @@ class UserModel {
         }
     }
 
-    // ▼▼▼ MÉTODO ATUALIZADO (aceita null) ▼▼▼
-    public function updateAvatar(int $userId, ?string $avatarPath): bool
-    {
+    public function updateAvatar(int $userId, ?string $avatarPath): bool {
         $sql = "UPDATE users SET avatar = :avatar, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
-                ':avatar' => $avatarPath, // Pode ser null
+                ':avatar' => $avatarPath,
                 ':id' => $userId
             ]);
         } catch (PDOException $e) {
@@ -108,8 +108,7 @@ class UserModel {
         }
     }
 
-    public function getPasswordHash(int $userId): ?string
-    {
+    public function getPasswordHash(int $userId): ?string {
         $sql = "SELECT password FROM users WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $userId]);
@@ -117,8 +116,7 @@ class UserModel {
         return $result['password'] ?? null;
     }
 
-    public function updatePasswordById(int $userId, string $newHashedPassword): bool
-    {
+    public function updatePasswordById(int $userId, string $newHashedPassword): bool {
         $sql = "UPDATE users SET password = :password, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
@@ -130,5 +128,43 @@ class UserModel {
             error_log("UserModel::updatePasswordById Error: " . $e->getMessage());
             return false;
         }
+    }
+
+
+    /* ==========================================================
+     *   ▼▼▼ MÉTODOS DO ADMIN — TS-Admin-01 ▼▼▼
+     * ========================================================== */
+
+    public function getAllUsers() {
+        $sql = "SELECT id, name, email, role, status, created_at 
+                FROM users 
+                ORDER BY id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function updateRole($userId, $role) {
+        $sql = "UPDATE users SET role = :role WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':role' => $role,
+            ':id'   => $userId
+        ]);
+    }
+
+    public function updateStatus($userId, $status) {
+        $sql = "UPDATE users SET status = :st WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':st' => $status,
+            ':id' => $userId
+        ]);
+    }
+
+    public function findById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 }
