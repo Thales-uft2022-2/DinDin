@@ -25,6 +25,9 @@ if (!$userAvatar && isset($_SESSION['user']['name']) && !empty($_SESSION['user']
     
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
 
+    <!-- ==== NOVO (Chart.js) ==== -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');

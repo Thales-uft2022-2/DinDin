@@ -149,6 +149,8 @@ class UserController {
     /**
      * Processa a atualização de AVATAR (Foto de Perfil)
      * (US-Profile-01 - POST)
+     *
+     * ==== CÓDIGO CORRIGIDO COM MELHORES VERIFICAÇÕES ====
      */
     public function updateAvatar()
     {
@@ -162,6 +164,7 @@ class UserController {
         if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['avatar'];
             
+            // Validações
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!in_array($file['type'], $allowedTypes)) {
                 $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: Apenas arquivos JPG, PNG, GIF ou WebP.'];
@@ -175,24 +178,49 @@ class UserController {
                 exit;
             }
             
+            // Construção do caminho
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = 'user_' . $userId . '_' . uniqid() . '.' . $extension;
-            $uploadDir = 'uploads/avatars/'; 
-            $uploadPath = $uploadDir . $filename;
             
-            $destination = __DIR__ . '/../../public/' . $uploadPath;
+            // Caminho relativo à web (para salvar no banco)
+            $uploadPath = 'uploads/avatars/' . $filename; 
+            
+            // Caminho absoluto no servidor (para mover o arquivo)
+            $destinationDir = __DIR__ . '/../../public/uploads/avatars';
+            $destination = $destinationDir . '/' . $filename;
 
-            if (!is_dir(dirname($destination))) {
-                mkdir(dirname($destination), 0777, true);
+            // ==== INÍCIO DA CORREÇÃO ====
+            
+            // 1. Tenta criar o diretório se ele não existir
+            if (!is_dir($destinationDir)) {
+                // Tenta criar recursivamente (o 'true' no final)
+                if (!mkdir($destinationDir, 0775, true)) { 
+                    // Se o mkdir FALHAR, este é o erro real
+                    $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: Não foi possível criar o diretório de uploads. Verifique as permissões da pasta "public".'];
+                    header('Location: ' . BASE_URL . '/profile');
+                    exit;
+                }
             }
             
+            // 2. Verifica se o diretório é gravável (writable)
+            if (!is_writable($destinationDir)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: O diretório de uploads não tem permissão de escrita.'];
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
+            }
+            
+            // ==== FIM DA CORREÇÃO ====
+
             // Apaga a foto antiga, se existir
             $oldAvatar = $_SESSION['user']['avatar'] ?? null;
             if ($oldAvatar && file_exists(__DIR__ . '/../../public/' . $oldAvatar)) {
-                unlink(__DIR__ . '/../../public/' . $oldAvatar);
+                // Suprime erros caso o arquivo não exista mais por algum motivo
+                @unlink(__DIR__ . '/../../public/' . $oldAvatar);
             }
 
+            // 3. Agora tenta mover o arquivo
             if (move_uploaded_file($file['tmp_name'], $destination)) {
+                // Sucesso
                 if ($this->userModel->updateAvatar($userId, $uploadPath)) {
                     $_SESSION['user']['avatar'] = $uploadPath;
                     $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Foto de perfil atualizada!'];
@@ -200,10 +228,23 @@ class UserController {
                     $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao salvar o caminho no banco.'];
                 }
             } else {
-                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo.'];
+                // O erro original
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo. (Permissões do servidor)'];
             }
         } else {
-            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Nenhum arquivo enviado ou erro no upload.'];
+            // Trata outros erros de upload
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE => 'O arquivo excede o limite (upload_max_filesize).',
+                UPLOAD_ERR_FORM_SIZE => 'O arquivo excede o limite (MAX_FILE_SIZE).',
+                UPLOAD_ERR_PARTIAL => 'O upload foi feito parcialmente.',
+                UPLOAD_ERR_NO_FILE => 'Nenhum arquivo enviado.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Faltando diretório temporário.',
+                UPLOAD_ERR_CANT_WRITE => 'Falha ao escrever no disco.',
+                UPLOAD_ERR_EXTENSION => 'Upload parado por extensão do PHP.',
+            ];
+            $errorCode = $_FILES['avatar']['error'] ?? UPLOAD_ERR_NO_FILE;
+            $message = $uploadErrors[$errorCode] ?? 'Erro desconhecido no upload.';
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => $message];
         }
         
         header('Location: ' . BASE_URL . '/profile');
@@ -225,7 +266,7 @@ class UserController {
 
         // 1. Apaga o arquivo físico, se existir
         if ($oldAvatar && file_exists(__DIR__ . '/../../public/' . $oldAvatar)) {
-            unlink(__DIR__ . '/../../public/' . $oldAvatar);
+            @unlink(__DIR__ . '/../../public/' . $oldAvatar);
         }
 
         // 2. Remove do banco de dados (seta como NULL)
