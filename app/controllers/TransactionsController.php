@@ -298,91 +298,16 @@ class TransactionsController
         }
 
         // 🔧 Corrigido: busca as categorias do usuário
-        $categoryModel = new CategoryModel();
-        $categories = $categoryModel->findAllByUserId($userId);
+        // $categoryModel = new CategoryModel(); // Usar o $this->categoryModel
+        $categories = $this->categoryModel->findAllByUserId($userId);
 
         $action = BASE_URL . '/transactions/update';
-        ?>
-        <div class="form-container">
-            <h1>Editar Transação</h1>
-            <form method="post" action="<?= htmlspecialchars($action) ?>">
-                <input type="hidden" name="id" value="<?= htmlspecialchars($transaction['id']) ?>">
-
-                <label>Tipo:
-                    <select name="type" id="type" required>
-                        <option value="income" <?= $transaction['type'] === 'income' ? 'selected' : '' ?>>Receita</option>
-                        <option value="expense" <?= $transaction['type'] === 'expense' ? 'selected' : '' ?>>Despesa</option>
-                    </select>
-                </label><br><br>
-
-                <label>Categoria:
-                    <select name="category" id="category" required>
-                        <option value="">Selecione uma categoria</option>
-                        <?php
-                        if (!empty($categories)) {
-                            foreach ($categories as $cat) {
-                                $selected = ($cat['name'] === $transaction['category']) ? 'selected' : '';
-                                echo '<option value="' . htmlspecialchars($cat['name']) . '" data-type="' . htmlspecialchars($cat['type']) . '" ' . $selected . '>'
-                                    . htmlspecialchars($cat['name'])
-                                    . ' (' . ($cat['type'] === 'income' ? 'Receita' : 'Despesa') . ')</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </label><br><br>
-
-                <label>Descrição:
-                    <input type="text" name="description" value="<?= htmlspecialchars($transaction['description']) ?>">
-                </label><br><br>
-
-                <label>Valor (R$):
-                    <input type="number" step="0.01" name="amount" value="<?= htmlspecialchars($transaction['amount']) ?>" required>
-                </label><br><br>
-
-                <label>Data:
-                    <input type="date" name="date" value="<?= htmlspecialchars($transaction['date']) ?>">
-                </label><br><br>
-
-                <button type="submit">Atualizar</button>
-            </form>
-        </div>
-
-        <script>
-            // Filtra categorias conforme o tipo escolhido
-            const typeSelect = document.getElementById('type');
-            const categorySelect = document.getElementById('category');
-            const allOptions = Array.from(categorySelect.options);
-
-            function filterEditCategories() {
-                const selectedType = typeSelect.value;
-                const currentCategoryValue = "<?= htmlspecialchars($transaction['category']) ?>"; // Pega o valor atual
                 
-                categorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
-                
-                allOptions.forEach(opt => {
-                    if (opt.dataset.type === selectedType) {
-                        // Recria a opção para evitar problemas
-                        const newOption = new Option(opt.text, opt.value);
-                        newOption.dataset.type = opt.dataset.type;
-                        
-                        // Se for a categoria que já estava salva, seleciona ela
-                        if (opt.value === currentCategoryValue) {
-                            newOption.selected = true;
-                        }
-                        categorySelect.appendChild(newOption);
-                    }
-                });
-            }
+        // ✅ CARREGA A VIEW CORRETA ✅
+        // As variáveis $transaction, $categories, e $action
+        // estarão disponíveis na view.
+        include_once __DIR__ . '/../views/transactions/edit.php';
 
-            typeSelect.addEventListener('change', filterEditCategories);
-
-            // Atualiza automaticamente o filtro com base no tipo atual
-            window.addEventListener('DOMContentLoaded', () => {
-                filterEditCategories();
-            });
-        </script>
-
-        <?php
         include_once __DIR__ . '/../views/_footer.php';
     }
 
