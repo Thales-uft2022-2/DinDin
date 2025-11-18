@@ -3,7 +3,6 @@
 // ===== DEBUG MODE =====
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-// ======================
 
 // Configurações e autoload
 require_once __DIR__ . '/../config/config.php';
@@ -27,26 +26,26 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Inicia a sessão (caso ainda não tenha sido iniciada)
+// Inicia a sessão
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-// Captura e trata a URL atual
-$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+// Captura a URL
+$uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// ============================================================
-// 🔗 DEFINIÇÃO DAS ROTAS DO SISTEMA
-// ============================================================
+// =========================================
+// ROTAS DO SISTEMA
+// =========================================
 $routes = [
 
-    // --------- TELA INICIAL ---------
+    // --------- HOME ----------
     '' => ['HomeController', 'index'],
     'home' => ['HomeController', 'index'],
 
-    // --------- AUTENTICAÇÃO ---------
+    // --------- AUTH ----------
     'auth/login' => ['AuthController', 'login'],
     'auth/register' => ['AuthController', 'register'],
     'auth/logout' => ['AuthController', 'logout'],
@@ -55,19 +54,15 @@ $routes = [
     'auth/reset-password' => ['AuthController', 'resetPassword'],
     'auth/update-password' => ['AuthController', 'updatePassword'],
 
-    // --------- USUÁRIO E PERFIL ---------
-    'user/store' => ['UserController', 'store'],
-    'profile' => ['UserController', 'profile'],                  // (US-Profile-01) GET - Mostrar página de perfil
-    'profile/update' => ['UserController', 'updateProfile'],        // (US-Profile-01) POST - Atualizar nome
-    'profile/update-avatar' => ['UserController', 'updateAvatar'],    // (US-Profile-01) POST - Atualizar foto
-    
-    // ▼▼▼ NOVA ROTA PARA APAGAR AVATAR ▼▼▼
-    'profile/delete-avatar' => ['UserController', 'deleteAvatar'],    // (US-Profile-01) POST - Apagar foto
-    
-    'profile/password' => ['UserController', 'showChangePasswordForm'], // (US-Profile-02) GET - Mostrar pág. de senha
-    'profile/change-password' => ['UserController', 'changePassword'],  // (US-Profile-02) POST - Atualizar senha
+    // --------- PERFIL ----------
+    'profile' => ['UserController', 'profile'],
+    'profile/update' => ['UserController', 'updateProfile'],
+    'profile/update-avatar' => ['UserController', 'updateAvatar'],
+    'profile/delete-avatar' => ['UserController', 'deleteAvatar'],
+    'profile/password' => ['UserController', 'showChangePasswordForm'],
+    'profile/change-password' => ['UserController', 'changePassword'],
 
-    // --------- TRANSAÇÕES ---------
+    // --------- TRANSAÇÕES ----------
     'transactions' => ['TransactionsController', 'index'],
     'transactions/create' => ['TransactionsController', 'create'],
     'transactions/store' => ['TransactionsController', 'store'],
@@ -75,7 +70,7 @@ $routes = [
     'transactions/update' => ['TransactionsController', 'update'],
     'transactions/delete' => ['TransactionsController', 'delete'],
 
-    // --------- CATEGORIAS ---------
+    // --------- CATEGORIAS ----------
     'categories' => ['CategoryController', 'index'],
     'categories/create' => ['CategoryController', 'create'],
     'categories/store' => ['CategoryController', 'store'],
@@ -83,31 +78,38 @@ $routes = [
     'categories/update' => ['CategoryController', 'update'],
     'categories/delete' => ['CategoryController', 'delete'],
 
-    // --------- API (Seu código original) ---------
+    // --------- ADMIN (NOVO E CORRETO) ----------
+    'admin' => ['AdminController', 'index'],
+    'admin/update' => ['AdminController', 'update'],
+
+    // ---------- API ----------
     'api/transactions' => ['TransactionsController', 'apiIndex'],
     'api/transactions/create' => ['TransactionsController', 'apiCreate'],
     'api/transactions/update' => ['TransactionsController', 'apiUpdate'],
     'api/transactions/delete' => ['TransactionsController', 'apiDelete'],
+
     'api/auth/register' => ['AuthController', 'apiRegister'],
     'api/auth/login' => ['AuthController', 'apiLogin'],
     'api/auth/logout' => ['AuthController', 'apiLogout'],
     'api/auth/forgot-password' => ['AuthController', 'apiForgotPassword'],
     'api/auth/reset-password' => ['AuthController', 'apiResetPassword'],
+
     'api/categories' => ['CategoryController', 'apiIndex'],
     'api/categories/store' => ['CategoryController', 'apiStore'],
     'api/categories/update' => ['CategoryController', 'apiUpdate'],
     'api/categories/delete' => ['CategoryController', 'apiDelete'],
 ];
 
-// ============================================================
-// 🚀 RESOLUÇÃO DAS ROTAS
-// ============================================================
+// =========================================
+// RESOLUÇÃO DE ROTAS
+// =========================================
+
 if ($path === '') {
     [$controllerName, $action] = $routes[''];
 } elseif (isset($routes[$path])) {
     [$controllerName, $action] = $routes[$path];
 } else {
-    // fallback dinâmico /controller/action
+    // fallback controller/action
     $parts = explode('/', $path, 2);
     $ctrl = $parts[0];
     $action = $parts[1] ?? 'index';
@@ -115,15 +117,14 @@ if ($path === '') {
 
     if (!class_exists($controllerName) || !method_exists($controllerName, $action)) {
         http_response_code(404);
-        echo "<h1>404 - Página não encontrada</h1>";
-        echo "<p>Rota: /{$path}</p>";
+        echo "<h1>404 - Página não encontrada</h1><p>Rota: /{$path}</p>";
         exit;
     }
 }
 
-// ============================================================
-// ⚙️ EXECUÇÃO DO CONTROLLER
-// ============================================================
+// =========================================
+// EXECUÇÃO
+// =========================================
 try {
     $controllerInstance = new $controllerName();
     $controllerInstance->$action();

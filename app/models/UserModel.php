@@ -7,19 +7,33 @@ class UserModel {
         $this->db = Database::getConnection();
     }
 
+    // ============================================================
+    // BUSCAR POR EMAIL (AGORA INCLUINDO ROLE E STATUS)
+    // ============================================================
     public function findByEmail(string $email): ?array {
-        // Seleciona o avatar também
-        $stmt = $this->db->prepare('SELECT id, email, password, name, avatar FROM users WHERE email = :email');
+        $stmt = $this->db->prepare(
+            'SELECT id, email, password, name, avatar, role, status 
+             FROM users 
+             WHERE email = :email'
+        );
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         return $user ?: null;
     }
 
+    // ============================================================
+    // LOGIN (AGORA INCLUINDO ROLE E STATUS)
+    // ============================================================
     public function findByEmailAndPassword(string $email, string $password): ?array {
-        // Seleciona o avatar também
-        $stmt = $this->db->prepare('SELECT id, email, password, name, avatar FROM users WHERE email = :email AND provider = "email"');
+
+        $stmt = $this->db->prepare(
+            'SELECT id, email, password, name, avatar, role, status 
+             FROM users 
+             WHERE email = :email AND provider = "email"'
+        );
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
+
         if ($user && password_verify($password, $user['password'])) {
             unset($user['password']);
             return $user;
@@ -27,12 +41,16 @@ class UserModel {
         return null;
     }
 
+    // ============================================================
+    // CRIAR USUÁRIO — ADICIONADO ROLE E STATUS POR PADRÃO
+    // ============================================================
     public function create(string $name, string $email, string $password)
     {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         try {
             $stmt = $this->db->prepare(
-                'INSERT INTO users (name, email, password, provider) VALUES (:name, :email, :password, "email")'
+                'INSERT INTO users (name, email, password, provider, role, status)
+                 VALUES (:name, :email, :password, "email", "user", "active")'
             );
             $success = $stmt->execute([
                 'name' => $name,
@@ -49,6 +67,7 @@ class UserModel {
         }
     }
 
+    // ============================================================
     public function saveResetToken(string $email, string $token, string $expires): bool {
         $sql = "UPDATE users SET reset_token = :token, reset_token_expires = :expires WHERE email = :email";
         $stmt = $this->db->prepare($sql);
@@ -77,8 +96,7 @@ class UserModel {
         ]);
     }
 
-    public function updateName(int $userId, string $name): bool
-    {
+    public function updateName(int $userId, string $name): bool {
         $sql = "UPDATE users SET name = :name, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
@@ -92,14 +110,12 @@ class UserModel {
         }
     }
 
-    // ▼▼▼ MÉTODO ATUALIZADO (aceita null) ▼▼▼
-    public function updateAvatar(int $userId, ?string $avatarPath): bool
-    {
+    public function updateAvatar(int $userId, ?string $avatarPath): bool {
         $sql = "UPDATE users SET avatar = :avatar, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
-                ':avatar' => $avatarPath, // Pode ser null
+                ':avatar' => $avatarPath,
                 ':id' => $userId
             ]);
         } catch (PDOException $e) {
@@ -108,8 +124,7 @@ class UserModel {
         }
     }
 
-    public function getPasswordHash(int $userId): ?string
-    {
+    public function getPasswordHash(int $userId): ?string {
         $sql = "SELECT password FROM users WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $userId]);
@@ -117,8 +132,7 @@ class UserModel {
         return $result['password'] ?? null;
     }
 
-    public function updatePasswordById(int $userId, string $newHashedPassword): bool
-    {
+    public function updatePasswordById(int $userId, string $newHashedPassword): bool {
         $sql = "UPDATE users SET password = :password, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
