@@ -1,80 +1,179 @@
-CREATE DATABASE IF NOT EXISTS `dindin`;
-USE `dindin`;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Tempo de geração: 18/11/2025 às 04:05
+-- Versão do servidor: 10.4.32-MariaDB
+-- Versão do PHP: 8.2.12
 
--- Tabela de Usuários (principal)
-CREATE TABLE `users` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `email` VARCHAR(255) UNIQUE NOT NULL,
-  `password` VARCHAR(255) NULL, -- Pode ser NULL para usuários que usam apenas Google OAuth
-  `name` VARCHAR(255) NOT NULL,
-  `avatar` VARCHAR(500) NULL, -- URL da imagem do Google ou upload
-  `provider` ENUM('email', 'google') DEFAULT 'email', -- Tipo de autenticação
-  `provider_id` VARCHAR(255) NULL, -- ID único do Google OAuth
-  `email_verified` BOOLEAN DEFAULT FALSE,
-  `verification_token` VARCHAR(100) NULL,
-  `reset_token` VARCHAR(100) NULL,
-  `reset_token_expires` DATETIME NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
-  INDEX `idx_email` (`email`),
-  INDEX `idx_provider` (`provider`),
-  INDEX `idx_reset_token` (`reset_token`)
-);
 
--- Tabela de Transações (atualizada com user_id)
-CREATE TABLE `transactions` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `type` ENUM('income', 'expense') NOT NULL,
-  `category` VARCHAR(100) NOT NULL, -- OBS: Esta coluna será ALTERADA/REMOVIDA quando integrarmos US-Cat-02/US-Tx-06
-  `description` VARCHAR(255),
-  `amount` DECIMAL(10, 2) NOT NULL,
-  `date` DATE NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  INDEX `idx_user_id` (`user_id`),
-  INDEX `idx_date` (`date`),
-  INDEX `idx_category` (`category`)
-);
+--
+-- Banco de dados: `dindin`
+--
 
--- Tabela de Categorias (NOVA - Sprint 4 / US-Cat-01)
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `categories`
+--
+
 CREATE TABLE `categories` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL COMMENT 'Chave estrangeira para a tabela users',
-  `name` VARCHAR(100) NOT NULL COMMENT 'Nome da categoria (ex: Alimentação)',
-  `type` ENUM('income', 'expense') NOT NULL COMMENT 'Tipo da categoria (Receita ou Despesa)',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL COMMENT 'Chave estrangeira para a tabela users',
+  `name` varchar(100) NOT NULL COMMENT 'Nome da categoria (ex: Alimentação)',
+  `type` enum('income','expense') NOT NULL COMMENT 'Tipo da categoria (Receita ou Despesa)',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Armazena as categorias personalizadas dos utilizadores';
 
-  -- Chave estrangeira ligando ao utilizador
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+--
+-- Despejando dados para a tabela `categories`
+--
 
-  -- Índice para garantir que um utilizador não repita nome e tipo de categoria
-  UNIQUE KEY `uq_user_category_name_type` (`user_id`, `name`, `type`),
+INSERT INTO `categories` (`id`, `user_id`, `name`, `type`, `created_at`, `updated_at`) VALUES
+(9, 2, 'salario', 'income', '2025-11-04 22:48:31', '2025-11-04 22:48:31'),
+(10, 2, 'supermercado', 'expense', '2025-11-05 11:42:10', '2025-11-05 11:42:10'),
+(11, 2, 'comparas', 'expense', '2025-11-05 11:42:22', '2025-11-05 11:42:22');
 
-  -- Índices adicionais para performance
-  INDEX `idx_user_id` (`user_id`),
-  INDEX `idx_type` (`type`)
-) COMMENT 'Armazena as categorias personalizadas dos utilizadores';
+-- --------------------------------------------------------
 
+--
+-- Estrutura para tabela `transactions`
+--
 
--- --- DADOS DE EXEMPLO ---
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `type` enum('income','expense') NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Inserir usuário de exemplo (senha: "senha123" hash)
--- Certifique-se de que o ID deste usuário seja 1 para os exemplos abaixo funcionarem
-INSERT INTO `users` (`id`, `email`, `password`, `name`, `email_verified`)
-VALUES (1, 'usuario@exemplo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Usuário Exemplo', TRUE)
-ON DUPLICATE KEY UPDATE email = email; -- Evita erro se o usuário 1 já existir
+--
+-- Despejando dados para a tabela `transactions`
+--
 
--- Atualizar transações existentes para associar ao usuário 1 (se existirem)
--- Atenção: O INSERT abaixo SÓ funciona se a tabela transactions estiver VAZIA.
--- Se já tiver dados, use UPDATE ou adicione novas transações.
--- Exemplo de INSERT (apenas para base limpa):
--- INSERT INTO `transactions` (`user_id`, `type`, `category`, `description`, `amount`, `date`)
--- VALUES (1, 'expense', 'Moradia', 'Aluguel', 1200.00, '2025-10-05'),
---        (1, 'income', 'Salário', 'Pagamento Outubro', 5000.00, '2025-10-01');
+INSERT INTO `transactions` (`id`, `user_id`, `type`, `category`, `description`, `amount`, `date`, `created_at`) VALUES
+(1, 2, 'income', 'salario', 'salario', 3400.00, '2025-11-03', '2025-11-04 23:00:57'),
+(2, 2, 'expense', 'supermercado', 'Compras do mes', 450.00, '2025-11-05', '2025-11-05 11:43:02');
 
--- (Você pode adicionar INSERTs para categorias padrão se desejar)
--- INSERT INTO `categories` (`user_id`, `name`, `type`) VALUES (1, 'Salário', 'income'), (1, 'Moradia', 'expense'), (1, 'Alimentação', 'expense');
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `provider` enum('email','google') DEFAULT 'email',
+  `provider_id` varchar(255) DEFAULT NULL,
+  `email_verified` tinyint(1) DEFAULT 0,
+  `verification_token` varchar(100) DEFAULT NULL,
+  `reset_token` varchar(100) DEFAULT NULL,
+  `reset_token_expires` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `role` varchar(20) DEFAULT 'user',
+  `status` varchar(20) DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `users`
+--
+
+INSERT INTO `users` (`id`, `email`, `password`, `name`, `avatar`, `provider`, `provider_id`, `email_verified`, `verification_token`, `reset_token`, `reset_token_expires`, `created_at`, `updated_at`, `is_admin`, `role`, `status`) VALUES
+(2, 'admin.nti@embrapa.br', '$2y$10$NGstdlZ6QlgLlz4SHIKQweTAwuKNxhGwdir26MUgx.193J5Y0WVpu', 'Nucleo de Tecnologia da Informação - Embrapa', 'uploads/avatars/user_2_691bc257f0c49.jpg', 'email', NULL, 0, NULL, NULL, NULL, '2025-11-04 22:48:05', '2025-11-18 00:48:23', 0, 'admin', 'active'),
+(3, 'teste@teste.com', '$2y$10$pq8LsOZjn0C7XwpAgx/WqeAcLk4dk1t9VQhhXGpVRRA3mX1YRQblW', 'teste', NULL, 'email', NULL, 0, NULL, NULL, NULL, '2025-11-17 20:10:40', '2025-11-18 01:36:53', 0, 'user', 'blocked');
+
+--
+-- Índices para tabelas despejadas
+--
+
+--
+-- Índices de tabela `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_user_category_name_type` (`user_id`,`name`,`type`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_type` (`type`);
+
+--
+-- Índices de tabela `transactions`
+--
+ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_date` (`date`),
+  ADD KEY `idx_category` (`category`);
+
+--
+-- Índices de tabela `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_email` (`email`),
+  ADD KEY `idx_provider` (`provider`),
+  ADD KEY `idx_reset_token` (`reset_token`);
+
+--
+-- AUTO_INCREMENT para tabelas despejadas
+--
+
+--
+-- AUTO_INCREMENT de tabela `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de tabela `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de tabela `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Restrições para tabelas despejadas
+--
+
+--
+-- Restrições para tabelas `categories`
+--
+ALTER TABLE `categories`
+  ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `transactions`
+--
+ALTER TABLE `transactions`
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
