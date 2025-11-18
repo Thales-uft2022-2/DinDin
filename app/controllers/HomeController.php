@@ -30,10 +30,24 @@ class HomeController
         $userId = $_SESSION['user']['id'];
 
         // 2. Busca os dados do resumo mensal usando o DashboardService
+        // $monthlySummary agora também contém 'startDate' e 'endDate'
         $monthlySummary = $this->dashboardService->getMonthlySummary($userId);
 
-        // 3. Renderiza a view home.php, passando os dados do resumo
-        // A view terá acesso à variável $monthlySummary
+        // 3. (NOVO) Busca dados para o gráfico de pizza
+        $expensesByCategoryData = $this->dashboardService->getExpensesByCategoryData(
+            $userId, 
+            $monthlySummary['startDate'], 
+            $monthlySummary['endDate']
+        );
+        
+        // 4. (NOVO) Busca dados para o gráfico de linha
+        $financialEvolutionData = $this->dashboardService->getFinancialEvolutionData($userId);
+
+        // 5. Renderiza a view home.php, passando todos os dados
+        // A view terá acesso a:
+        // - $monthlySummary
+        // - $expensesByCategoryData
+        // - $financialEvolutionData
         include __DIR__ . '/../views/home.php';
     }
 }

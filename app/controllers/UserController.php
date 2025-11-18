@@ -5,111 +5,315 @@ class UserController {
 
     public function __construct() {
         $this->userModel = new UserModel();
-    }
-    
-    /**
-     * Exibe o formulário de registro/login (Rota: /user/register)
-     */
-    public function register() {
-        // Se já estiver logado, redireciona para a home
-        if (isset($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . '/home');
-            exit;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-
-        // Pega as mensagens de sucesso ou erro da sessão e as limpa
-        $error = $_SESSION['error'] ?? null;
-        $success = $_SESSION['success'] ?? null;
-        unset($_SESSION['error'], $_SESSION['success']);
-        
-        // Cria o diretório se não existir (para a View)
-        $viewDir = __DIR__ . '/../views/auth';
-        if (!is_dir($viewDir)) {
-            mkdir($viewDir, 0777, true);
-        }
-
-        // Inclui a view de registro/login
-        include __DIR__ . '/../views/auth/register.php';
     }
 
     /**
-     * Processa o envio do formulário de registro (Rota: /user/store)
+     * Exibe a página principal de "Meu Perfil" (Nome e Avatar)
+     * (US-Profile-01 - GET)
      */
-    public function store() {
-        // ... (código do store inalterado, pois já estava funcionando) ...
+    public function profile()
+    {
+        if (empty($_SESSION['user']['id'])) {
+            header('Location: ' . BASE_URL . '/auth/login');
+            exit;
+        }
 
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        
-        // 1. Validação de Dados
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['error'] = '⚠️ E-mail inválido!';
-        } elseif (strlen($password) < 8) {
-            $_SESSION['error'] = '⚠️ A senha deve ter no mínimo 8 caracteres.';
+        $user = $_SESSION['user'];
+
+        $flashMessage = $_SESSION['flash_message'] ?? null;
+        if ($flashMessage) {
+            unset($_SESSION['flash_message']);
         }
         
-        if (isset($_SESSION['error'])) {
-            header('Location: ' . BASE_URL . '/user/register');
+        $validationErrors = $_SESSION['validation_errors'] ?? [];
+        if ($validationErrors) {
+            unset($_SESSION['validation_errors']);
+        }
+
+        // Passa $user, $flashMessage, e $validationErrors para a view
+        include __DIR__ . '/../views/user/profile.php';
+    }
+
+    /**
+     * Exibe a página separada "Alterar Senha"
+     * (US-Profile-02 - GET)
+     */
+    public function showChangePasswordForm()
+    {
+        if (empty($_SESSION['user']['id'])) {
+            header('Location: ' . BASE_URL . '/auth/login');
             exit;
         }
+
+        $user = $_SESSION['user']; // A view pode precisar
         
-        // 2. Critério de Aceite: Verificar se o e-mail já existe
-        if ($this->userModel->findByEmail($email)) {
-            $_SESSION['error'] = '❌ E-mail já cadastrado.';
-            header('Location: ' . BASE_URL . '/user/register');
-            exit;
+        $flashMessage = $_SESSION['flash_message'] ?? null;
+        if ($flashMessage) {
+            unset($_SESSION['flash_message']);
         }
         
-        // 3. Criação do Usuário
-        if ($this->userModel->create($email, $password)) {
-            $_SESSION['success'] = '✅ Cadastro realizado com sucesso! Agora você pode fazer o login com seu e-mail e senha.';
+        $validationErrors = $_SESSION['validation_errors'] ?? [];
+        if ($validationErrors) {
+            unset($_SESSION['validation_errors']);
+        }
+
+        // Carrega a view de senha
+        include __DIR__ . '/../views/user/change-password.php';
+    }
+
+    /**
+     * Processa a atualização de NOME
+     * (US-Profile-01 - POST)
+     */
+    public function updateProfile()
+    {
+        if (empty($_SESSION['user']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/profile');
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $newName = trim($_POST['name'] ?? '');
+
+        if (empty($newName)) {
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'O nome não pode ficar em branco.'];
+            header('Location: ' . BASE_URL . '/profile');
+            exit;
+        }
+
+        if ($this->userModel->updateName($userId, $newName)) {
+            $_SESSION['user']['name'] = $newName;
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Nome atualizado com sucesso!'];
         } else {
-            $_SESSION['error'] = '❌ Erro ao tentar cadastrar o usuário. Por favor, tente novamente.';
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao atualizar o nome.'];
         }
-        
-        header('Location: ' . BASE_URL . '/user/register');
+
+        header('Location: ' . BASE_URL . '/profile');
         exit;
     }
 
     /**
-     * Processa o envio do formulário de login (Nova Rota: /user/authenticate)
+     * Processa a atualização de SENHA
+     * (US-Profile-02 - POST)
      */
-    public function authenticate() {
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-
-        if (empty($email) || empty($password)) {
-            $_SESSION['error'] = '⚠️ Por favor, informe e-mail e senha.';
-            header('Location: ' . BASE_URL . '/user/register');
+    public function changePassword()
+    {
+        if (empty($_SESSION['user']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/profile/password');
             exit;
         }
 
-        $user = $this->userModel->findByEmailAndPassword($email, $password);
+        $userId = $_SESSION['user']['id'];
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $errors = [];
 
-        if ($user) {
-            // Sucesso: Autenticação bem-sucedida
-            $_SESSION['user_id'] = $user['id']; // CRUCIAL para as Transações!
-            $_SESSION['user_name'] = $user['name'];
-            
-            // Redireciona para a página inicial (home.php)
-            header('Location: ' . BASE_URL . '/home');
+        // Validações
+        if (strlen($newPassword) < 8) {
+            $errors['new_password'] = 'A nova senha deve ter no mínimo 8 caracteres.';
+        }
+        if ($newPassword !== $confirmPassword) {
+            $errors['confirm_password'] = 'As senhas não coincidem.';
+        }
+
+        // Verificar senha atual
+        $hash = $this->userModel->getPasswordHash($userId);
+        if (!$hash || !password_verify($currentPassword, $hash)) {
+            $errors['current_password'] = 'Senha atual incorreta.';
+        }
+
+        // Se houver erros, voltar
+        if (!empty($errors)) {
+            $_SESSION['validation_errors'] = $errors;
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Não foi possível alterar a senha. Verifique os erros.'];
+            header('Location: ' . BASE_URL . '/profile/password'); // Redireciona para pág. de senha
             exit;
+        }
 
+        // Sucesso: Atualizar senha
+        $newHashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        if ($this->userModel->updatePasswordById($userId, $newHashedPassword)) {
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Senha alterada com sucesso!'];
         } else {
-            // Falha na autenticação
-            $_SESSION['error'] = '❌ E-mail ou senha incorretos.';
-            header('Location: ' . BASE_URL . '/user/register');
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao atualizar a senha.'];
+        }
+
+        header('Location: ' . BASE_URL . '/profile/password'); // Redireciona para pág. de senha
+        exit;
+    }
+
+    /**
+     * Processa a atualização de AVATAR (Foto de Perfil)
+     * (US-Profile-01 - POST)
+     *
+     * ==== CÓDIGO CORRIGIDO COM MELHORES VERIFICAÇÕES ====
+     */
+    public function updateAvatar()
+    {
+        if (empty($_SESSION['user']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/profile');
             exit;
         }
+        
+        $userId = $_SESSION['user']['id'];
+        
+        if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['avatar'];
+            
+            // Validações
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($file['type'], $allowedTypes)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: Apenas arquivos JPG, PNG, GIF ou WebP.'];
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
+            }
+            
+            if ($file['size'] > 2 * 1024 * 1024) { // 2MB Max
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: O arquivo é muito grande (máx 2MB).'];
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
+            }
+            
+            // Construção do caminho
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'user_' . $userId . '_' . uniqid() . '.' . $extension;
+            
+            // Caminho relativo à web (para salvar no banco)
+            $uploadPath = 'uploads/avatars/' . $filename; 
+            
+            // Caminho absoluto no servidor (para mover o arquivo)
+            $destinationDir = __DIR__ . '/../../public/uploads/avatars';
+            $destination = $destinationDir . '/' . $filename;
+
+            // ==== INÍCIO DA CORREÇÃO ====
+            
+            // 1. Tenta criar o diretório se ele não existir
+            if (!is_dir($destinationDir)) {
+                // Tenta criar recursivamente (o 'true' no final)
+                if (!mkdir($destinationDir, 0775, true)) { 
+                    // Se o mkdir FALHAR, este é o erro real
+                    $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: Não foi possível criar o diretório de uploads. Verifique as permissões da pasta "public".'];
+                    header('Location: ' . BASE_URL . '/profile');
+                    exit;
+                }
+            }
+            
+            // 2. Verifica se o diretório é gravável (writable)
+            if (!is_writable($destinationDir)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro: O diretório de uploads não tem permissão de escrita.'];
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
+            }
+            
+            // ==== FIM DA CORREÇÃO ====
+
+            // Apaga a foto antiga, se existir
+            $oldAvatar = $_SESSION['user']['avatar'] ?? null;
+            if ($oldAvatar && file_exists(__DIR__ . '/../../public/' . $oldAvatar)) {
+                // Suprime erros caso o arquivo não exista mais por algum motivo
+                @unlink(__DIR__ . '/../../public/' . $oldAvatar);
+            }
+
+            // 3. Agora tenta mover o arquivo
+            if (move_uploaded_file($file['tmp_name'], $destination)) {
+                // Sucesso
+                if ($this->userModel->updateAvatar($userId, $uploadPath)) {
+                    $_SESSION['user']['avatar'] = $uploadPath;
+                    $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Foto de perfil atualizada!'];
+                } else {
+                    $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao salvar o caminho no banco.'];
+                }
+            } else {
+                // O erro original
+                $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo. (Permissões do servidor)'];
+            }
+        } else {
+            // Trata outros erros de upload
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE => 'O arquivo excede o limite (upload_max_filesize).',
+                UPLOAD_ERR_FORM_SIZE => 'O arquivo excede o limite (MAX_FILE_SIZE).',
+                UPLOAD_ERR_PARTIAL => 'O upload foi feito parcialmente.',
+                UPLOAD_ERR_NO_FILE => 'Nenhum arquivo enviado.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Faltando diretório temporário.',
+                UPLOAD_ERR_CANT_WRITE => 'Falha ao escrever no disco.',
+                UPLOAD_ERR_EXTENSION => 'Upload parado por extensão do PHP.',
+            ];
+            $errorCode = $_FILES['avatar']['error'] ?? UPLOAD_ERR_NO_FILE;
+            $message = $uploadErrors[$errorCode] ?? 'Erro desconhecido no upload.';
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => $message];
+        }
+        
+        header('Location: ' . BASE_URL . '/profile');
+        exit;
+    }
+
+    /**
+     * Processa a exclusão do AVATAR (Foto de Perfil)
+     */
+    public function deleteAvatar()
+    {
+        if (empty($_SESSION['user']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/profile');
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $oldAvatar = $_SESSION['user']['avatar'] ?? null;
+
+        // 1. Apaga o arquivo físico, se existir
+        if ($oldAvatar && file_exists(__DIR__ . '/../../public/' . $oldAvatar)) {
+            @unlink(__DIR__ . '/../../public/' . $oldAvatar);
+        }
+
+        // 2. Remove do banco de dados (seta como NULL)
+        if ($this->userModel->updateAvatar($userId, null)) {
+            $_SESSION['user']['avatar'] = null;
+            $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'Foto de perfil removida.'];
+        } else {
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Erro ao remover a foto.'];
+        }
+
+        header('Location: ' . BASE_URL . '/profile');
+        exit;
     }
     
-    /**
-     * Finaliza a sessão do usuário (Nova Rota: /user/logout)
-     */
+    // --- MÉTODOS ANTIGOS (Mantidos por segurança) ---
+    public function register() {
+        header('Location: ' . BASE_URL . '/auth/register'); exit;
+    }
+
+    // ▼▼▼ FUNÇÃO 'STORE' CORRIGIDA ▼▼▼
+    public function store() {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $name = trim($_POST['name'] ?? '');
+        if(empty($name)) { $name = explode('@', $email)[0]; }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $_SESSION['error'] = '⚠️ E-mail inválido!'; }
+        elseif (strlen($password) < 8) { $_SESSION['error'] = '⚠️ A senha deve ter no mínimo 8 caracteres.'; }
+        if (isset($_SESSION['error'])) { header('Location: ' . BASE_URL . '/auth/register'); exit; }
+        if ($this->userModel->findByEmail($email)) {
+            $_SESSION['error'] = '❌ E-mail já cadastrado.';
+            header('Location: ' . BASE_URL . '/auth/register'); exit;
+        }
+        if ($this->userModel->create($name, $email, $password)) {
+            $_SESSION['success_message'] = '✅ Cadastro realizado com sucesso! Faça o login.';
+        } else { $_SESSION['error'] = '❌ Erro ao tentar cadastrar o usuário.'; }
+        header('Location: ' . BASE_URL . '/auth/register'); exit;
+    }
+
+    public function authenticate() {
+       header('Location: ' . BASE_URL . '/auth/login'); exit;
+    }
+    
     public function logout() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
         session_destroy();
         $_SESSION = [];
-        header('Location: ' . BASE_URL . '/user/register');
+        header('Location: ' . BASE_URL . '/auth/login');
         exit;
     }
 }

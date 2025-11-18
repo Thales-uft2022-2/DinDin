@@ -3,7 +3,6 @@
 // ===== DEBUG MODE =====
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-// ======================
 
 // Configurações e autoload
 require_once __DIR__ . '/../config/config.php';
@@ -27,82 +26,90 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Inicia a sessão (caso ainda não tenha sido iniciada)
+// Inicia a sessão
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-// Captura e trata a URL atual
+// Captura a URL
 $uri  = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $base = trim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 $path = ltrim(substr($uri, strlen($base)), '/');
 
-// ============================================================
-// 🔗 DEFINIÇÃO DAS ROTAS DO SISTEMA
-// ============================================================
+// =========================================
+// ROTAS DO SISTEMA
+// =========================================
 $routes = [
 
-    // --------- TELA INICIAL ---------
-    ''                      => ['HomeController', 'index'],
-    'home'                  => ['HomeController', 'index'],
+    // --------- HOME ----------
+    '' => ['HomeController', 'index'],
+    'home' => ['HomeController', 'index'],
 
-    // --------- AUTENTICAÇÃO ---------
-    'auth/login'            => ['AuthController', 'login'],
-    'auth/register'         => ['AuthController', 'register'],
-    'auth/logout'           => ['AuthController', 'logout'],
-    'auth/forgot-password'  => ['AuthController', 'forgotPassword'],
-    'auth/send-reset-link'  => ['AuthController', 'sendResetLink'],
-    'auth/reset-password'   => ['AuthController', 'resetPassword'],
-    'auth/update-password'  => ['AuthController', 'updatePassword'],
+    // --------- AUTH ----------
+    'auth/login' => ['AuthController', 'login'],
+    'auth/register' => ['AuthController', 'register'],
+    'auth/logout' => ['AuthController', 'logout'],
+    'auth/forgot-password' => ['AuthController', 'forgotPassword'],
+    'auth/send-reset-link' => ['AuthController', 'sendResetLink'],
+    'auth/reset-password' => ['AuthController', 'resetPassword'],
+    'auth/update-password' => ['AuthController', 'updatePassword'],
 
-    // --------- USUÁRIO ---------
-    'user/store'            => ['UserController', 'store'],
+    // --------- PERFIL ----------
+    'profile' => ['UserController', 'profile'],
+    'profile/update' => ['UserController', 'updateProfile'],
+    'profile/update-avatar' => ['UserController', 'updateAvatar'],
+    'profile/delete-avatar' => ['UserController', 'deleteAvatar'],
+    'profile/password' => ['UserController', 'showChangePasswordForm'],
+    'profile/change-password' => ['UserController', 'changePassword'],
 
-    // --------- TRANSAÇÕES ---------
-    'transactions'          => ['TransactionsController', 'index'],
-    'transactions/create'   => ['TransactionsController', 'create'],
-    'transactions/store'    => ['TransactionsController', 'store'],
-    'transactions/edit'     => ['TransactionsController', 'edit'],
-    'transactions/update'   => ['TransactionsController', 'update'],
-    'transactions/delete'   => ['TransactionsController', 'delete'],
+    // --------- TRANSAÇÕES ----------
+    'transactions' => ['TransactionsController', 'index'],
+    'transactions/create' => ['TransactionsController', 'create'],
+    'transactions/store' => ['TransactionsController', 'store'],
+    'transactions/edit' => ['TransactionsController', 'edit'],
+    'transactions/update' => ['TransactionsController', 'update'],
+    'transactions/delete' => ['TransactionsController', 'delete'],
 
-    // --------- CATEGORIAS ---------
-    'categories'            => ['CategoryController', 'index'],   // Listar
-    'categories/create'     => ['CategoryController', 'create'],  // Criar
-    'categories/store'      => ['CategoryController', 'store'],   // Salvar
-    'categories/edit'       => ['CategoryController', 'edit'],    // Editar
-    'categories/update'     => ['CategoryController', 'update'],  // Atualizar
-    'categories/delete'     => ['CategoryController', 'delete'],  // Excluir (Sprint 4)
+    // --------- CATEGORIAS ----------
+    'categories' => ['CategoryController', 'index'],
+    'categories/create' => ['CategoryController', 'create'],
+    'categories/store' => ['CategoryController', 'store'],
+    'categories/edit' => ['CategoryController', 'edit'],
+    'categories/update' => ['CategoryController', 'update'],
+    'categories/delete' => ['CategoryController', 'delete'],
 
-    // --------- API: TRANSAÇÕES ---------
-    'api/transactions'         => ['TransactionsController', 'apiIndex'],
-    'api/transactions/create'  => ['TransactionsController', 'apiCreate'],
-    'api/transactions/update'  => ['TransactionsController', 'apiUpdate'],
-    'api/transactions/delete'  => ['TransactionsController', 'apiDelete'],
+    // --------- ADMIN (NOVO E CORRETO) ----------
+    'admin' => ['AdminController', 'index'],
+    'admin/update' => ['AdminController', 'update'],
 
-    // --------- API: AUTENTICAÇÃO ---------
-    'api/auth/register'        => ['AuthController', 'apiRegister'],
-    'api/auth/login'           => ['AuthController', 'apiLogin'],
-    'api/auth/logout'          => ['AuthController', 'apiLogout'],
+    // ---------- API ----------
+    'api/transactions' => ['TransactionsController', 'apiIndex'],
+    'api/transactions/create' => ['TransactionsController', 'apiCreate'],
+    'api/transactions/update' => ['TransactionsController', 'apiUpdate'],
+    'api/transactions/delete' => ['TransactionsController', 'apiDelete'],
+
+    'api/auth/register' => ['AuthController', 'apiRegister'],
+    'api/auth/login' => ['AuthController', 'apiLogin'],
+    'api/auth/logout' => ['AuthController', 'apiLogout'],
     'api/auth/forgot-password' => ['AuthController', 'apiForgotPassword'],
-    'api/auth/reset-password'  => ['AuthController', 'apiResetPassword'],
+    'api/auth/reset-password' => ['AuthController', 'apiResetPassword'],
 
-    // --------- API: CATEGORIAS ---------
-    'api/categories'           => ['CategoryController', 'apiIndex'],
-    'api/categories/store'     => ['CategoryController', 'apiStore'],
-    'api/categories/update'    => ['CategoryController', 'apiUpdate'],
-    'api/categories/delete'    => ['CategoryController', 'apiDelete'],
+    'api/categories' => ['CategoryController', 'apiIndex'],
+    'api/categories/store' => ['CategoryController', 'apiStore'],
+    'api/categories/update' => ['CategoryController', 'apiUpdate'],
+    'api/categories/delete' => ['CategoryController', 'apiDelete'],
 ];
 
-// ============================================================
-// 🚀 RESOLUÇÃO DAS ROTAS
-// ============================================================
+// =========================================
+// RESOLUÇÃO DE ROTAS
+// =========================================
+
 if ($path === '') {
     [$controllerName, $action] = $routes[''];
 } elseif (isset($routes[$path])) {
     [$controllerName, $action] = $routes[$path];
 } else {
-    // fallback dinâmico /controller/action
+    // fallback controller/action
     $parts = explode('/', $path, 2);
     $ctrl = $parts[0];
     $action = $parts[1] ?? 'index';
@@ -110,15 +117,14 @@ if ($path === '') {
 
     if (!class_exists($controllerName) || !method_exists($controllerName, $action)) {
         http_response_code(404);
-        echo "<h1>404 - Página não encontrada</h1>";
-        echo "<p>Rota: /{$path}</p>";
+        echo "<h1>404 - Página não encontrada</h1><p>Rota: /{$path}</p>";
         exit;
     }
 }
 
-// ============================================================
-// ⚙️ EXECUÇÃO DO CONTROLLER
-// ============================================================
+// =========================================
+// EXECUÇÃO
+// =========================================
 try {
     $controllerInstance = new $controllerName();
     $controllerInstance->$action();

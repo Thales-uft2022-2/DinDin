@@ -389,6 +389,112 @@ Com o **DinDin**, você pode:
 **Para** garantir integridade dos dados e isolamento entre usuários.
 
 ---
+## 📌 Sprint 5 — Analytics, Perfil e Administração
+
+### US-Analytics-01 — Gráfico de Despesas por Categoria 📊
+**Como usuário, eu quero ver um gráfico (pizza ou rosca) no dashboard que detalha meus gastos por categoria no período selecionado, para entender rapidamente para onde meu dinheiro está indo.**
+
+**Critérios de Aceite:**
+- **Dado** que estou na página inicial (dashboard),  
+  **Quando** existem despesas cadastradas no período selecionado,  
+  **Então** vejo um gráfico do tipo pizza/rosça mostrando a distribuição percentual dos gastos por categoria.
+  
+- **Dado** que não há despesas no período selecionado,  
+  **Quando** visualizo o dashboard,  
+  **Então** vejo um estado vazio no gráfico com a mensagem "Nenhuma despesa no período".
+
+---
+
+### US-Analytics-02 — Gráfico de Evolução Financeira 📈
+**Como usuário, eu quero ver um gráfico de linha no dashboard que mostra o total de Receitas vs. Despesas dos últimos 6 meses, para acompanhar minha evolução financeira e identificar tendências.**
+
+**Critérios de Aceite:**
+- **Dado** que estou na página inicial (dashboard),  
+  **Quando** existem transações nos últimos 6 meses,  
+  **Então** vejo um gráfico de linha com duas séries: Receitas (verde) e Despesas (vermelho) ao longo do tempo.
+  
+- **Dado** que não há transações suficientes,  
+  **Quando** visualizo o gráfico,  
+  **Então** vejo os meses disponíveis ou estado vazio com mensagem "Dados insuficientes".
+
+---
+
+### US-Profile-01 — Página de Perfil (Visualização) 👤
+**Como usuário, eu quero acessar uma página de "Perfil" onde posso visualizar meus dados cadastrais (nome, e-mail), para consultar minhas informações e preparar para futuras edições.**
+
+**Critérios de Aceite:**
+- **Dado** que estou logado e acesso a página "Meu Perfil",  
+  **Quando** a página carrega,  
+  **Então** vejo meus dados cadastrais: nome completo e e-mail.
+  
+- **Dado** que meus dados estão incompletos,  
+  **Quando** visualizo o perfil,  
+  **Então** vejo campos vazios ou com valores padrão.
+
+---
+
+### US-Profile-02 — Página de Perfil (Alteração de Senha) 🔐
+**Como usuário, eu quero poder alterar minha senha com segurança através da minha página de Perfil, para manter minha conta segura e atualizar minhas credenciais.**
+
+**Critérios de Aceite:**
+- **Dado** que informo minha senha atual correta e uma nova senha válida (mín. 8 caracteres),  
+  **Quando** confirmo a alteração,  
+  **Então** minha senha é atualizada e recebo uma notificação de sucesso.
+  
+- **Dado** que informo a senha atual incorreta,  
+  **Quando** tento alterar a senha,  
+  **Então** vejo mensagem de erro "Senha atual incorreta".
+  
+- **Dado** que a nova senha não atende aos requisitos mínimos,  
+  **Quando** tento salvar,  
+  **Então** vejo mensagem explicativa sobre os requisitos.
+
+---
+
+### TS-Admin-01 — Estrutura de Permissão de Admin (Backend)
+**Como desenvolvedor, eu quero implementar uma lógica de role (função/permissão) no backend (ex: "USER" e "ADMIN") e um middleware de segurança, para proteger rotas e funcionalidades que só administradores podem acessar.**
+
+**Critérios de Aceite:**
+- **Dado** que um usuário comum tenta acessar uma rota administrativa,  
+  **Quando** o middleware verifica suas permissões,  
+  **Então** o acesso é negado com status 403.
+  
+- **Dado** que um administrador acessa uma rota administrativa,  
+  **Quando** o middleware valida sua role,  
+  **Então** o acesso é permitido.
+
+---
+
+### US-Admin-01 — Página de Administração (Listagem de Usuários) 👑
+**Como Administrador, eu quero acessar uma página /admin protegida, que lista todos os usuários cadastrados no sistema (nome, e-mail, data de cadastro), para ter uma visão geral de quem está usando a plataforma.**
+
+**Critérios de Aceite:**
+- **Dado** que sou administrador e acesso /admin,  
+  **Quando** a página carrega,  
+  **Então** vejo uma tabela paginada com todos os usuários: nome, e-mail e data de cadastro.
+  
+- **Dado** que não sou administrador,  
+  **Quando** tento acessar /admin,  
+  **Então** sou redirecionado com mensagem de acesso negado.
+
+---
+
+### TS-Test-03 — Testes Unitários (Serviços de Analytics e Perfil) 🛠️
+**Como desenvolvedor, eu quero criar testes unitários para os novos serviços (cálculo de dados para gráficos, alteração de senha, listagem de usuários), para garantir que os dados analíticos e as operações de usuário/admin são seguras e corretas.**
+
+**Critérios de Aceite:**
+- **Dado** um conjunto de transações de teste,  
+  **Quando** executo o serviço de cálculo de analytics,  
+  **Então** os valores retornados para os gráficos estão corretos.
+  
+- **Dado** uma solicitação de alteração de senha válida,  
+  **Quando** executo o serviço de perfil,  
+  **Então** a senha é criptografada e atualizada no banco.
+  
+- **Dado** uma solicitação de listagem de usuários por admin,  
+  **Quando** executo o serviço administrativo,  
+  **Então** retorna apenas os dados permitidos pela política de segurança.
+---
 # 📌 DIVISÃO DAS TAREFAS
 
 ## 1° Sprint - Gestão de Transações
@@ -440,3 +546,15 @@ Com o **DinDin**, você pode:
 | Testes - Serviço de Categorias (CRUD)          | TS-Test-02                  | Thales    | Vinicius |
 
 ---
+
+## 5° Sprint - Analytics, Perfil e Administração
+
+| Atividade                                      | Feature                     | Autor     | Revisor   |
+|------------------------------------------------|-----------------------------|-----------|-----------|
+| Gráfico de Despesas por Categoria              | **US-Analytics-01**         | Cristian  | Vinicius  |
+| Gráfico de Evolução Financeira                 | **US-Analytics-02**         | Cristian  | Vinicius  |
+| Página de Perfil (Visualização)                | **US-Profile-01**           | Gabriel   | Thales    |
+| Página de Perfil (Alteração de Senha)          | **US-Profile-02**           | Gabriel   | Thales    |
+| Estrutura de Permissão de Admin (Backend)      | **TS-Admin-01**             | Thales    | Cristian  |
+| Página de Administração (Listagem de Usuários) | **US-Admin-01**             | Thales    | Cristian  |
+| Testes Unitários (Analytics e Perfil)          | **TS-Test-03**              | Vinicius  | Gabriel   |
