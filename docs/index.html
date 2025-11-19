@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DinDin - Controle Financeiro</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts (Lato & Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           ESTILOS DO PROJETO (Baseado no style.css original)
+           ========================================================================== */
+        :root {
+            --bs-primary: #0D6EFD;
+            --bs-secondary: #6C757D;
+            --bs-success: #198754;
+            --bs-danger: #DC3545;
+            --bs-info: #0DCAF0;
+            --bs-warning: #FFC107;
+            
+            /* Cores do Tema Claro */
+            --bs-body-bg: #F8F9FA;
+            --bs-body-color: #212529;
+            --bs-border-color: #dee2e6;
+            --bs-card-bg: #ffffff;
+            --bs-card-header-bg: #ffffff;
+            --bs-heading-font-family: 'Poppins', sans-serif;
+            --bs-body-font-family: 'Lato', sans-serif;
+            --bs-border-radius-lg: 0.5rem;
+        }
+
+        [data-bs-theme="dark"] {
+            --bs-primary: #3b82f6;
+            --bs-secondary: #9ca3af;
+            --bs-success: #22c55e;
+            --bs-danger: #ef4444;
+            --bs-info: #0DCAF0;
+            --bs-warning: #FFC107;
+
+            /* Cores do Tema Escuro */
+            --bs-body-bg: #212529; 
+            --bs-body-color: #F8F9FA;
+            --bs-border-color: #495057;
+            --bs-card-bg: #343a40;
+        }
+
+        body {
+            font-family: var(--bs-body-font-family);
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 0 !important;
+        }
+
+        h1, h2, h3, h4, h5, h6 { font-family: var(--bs-heading-font-family); font-weight: 600; }
+        
+        .btn { 
+            font-family: var(--bs-heading-font-family); 
+            font-weight: 500; 
+            border-radius: 0.375rem;
+            padding: 0.5rem 1.2rem;
+        }
+        .btn:hover { transform: translateY(-2px); transition: all 0.2s; }
+        
+        /* Navbar Blur */
+        .landing-nav {
+            padding: 1rem 0;
+            background-color: rgba(var(--bs-body-bg-rgb), 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--bs-border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 7rem 0 5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        [data-bs-theme="dark"] .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+        }
+
+        .hero-headline {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subheadline {
+            font-size: 1.2rem;
+            color: var(--bs-secondary);
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        /* Mockup Dashboard */
+        .dashboard-mockup {
+            background-color: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 1rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 1.5rem;
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+        .dashboard-mockup:hover { transform: perspective(1000px) rotateY(0) rotateX(0); }
+
+        /* Gráfico Rosca CSS */
+        .donut-chart {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--bs-danger) 0% 45%, 
+                var(--bs-warning) 45% 75%, 
+                var(--bs-success) 75% 100%
+            );
+            position: relative;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .donut-hole {
+            width: 80px;
+            height: 80px;
+            background-color: var(--bs-card-bg);
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            left: 30px;
+        }
+
+        /* Gráfico de Linha SVG */
+        .line-chart-container {
+            height: 160px;
+            margin-top: 1rem;
+            position: relative;
+        }
+        .chart-svg path {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.2));
+        }
+        .path-income { stroke: var(--bs-success); }
+        .path-expense { stroke: var(--bs-danger); }
+
+        /* Cards de Features */
+        .feature-card {
+            background-color: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius-lg);
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--bs-primary);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        [data-bs-theme="dark"] .bg-soft-primary { background-color: rgba(59, 130, 246, 0.2); color: var(--bs-primary); }
+        [data-bs-theme="dark"] .bg-soft-success { background-color: rgba(34, 197, 94, 0.2); color: var(--bs-success); }
+        [data-bs-theme="dark"] .bg-soft-purple  { background-color: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        
+        [data-bs-theme="light"] .bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); color: var(--bs-primary); }
+        [data-bs-theme="light"] .bg-soft-success { background-color: rgba(25, 135, 84, 0.1); color: var(--bs-success); }
+        [data-bs-theme="light"] .bg-soft-purple  { background-color: rgba(111, 66, 193, 0.1); color: #6f42c1; }
+
+        /* Botão Flutuante de Tema */
+        .theme-toggle-float {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1050;
+            transition: transform 0.2s;
+        }
+        .theme-toggle-float:hover { transform: scale(1.1); }
+
+        [data-bs-theme="dark"] .theme-toggle-float .bi-sun-fill { display: block; color: var(--bs-warning); }
+        [data-bs-theme="dark"] .theme-toggle-float .bi-moon-stars-fill { display: none; }
+        [data-bs-theme="light"] .theme-toggle-float .bi-sun-fill { display: none; }
+        [data-bs-theme="light"] .theme-toggle-float .bi-moon-stars-fill { display: block; color: var(--bs-primary); }
+
+    </style>
+    <script>
+        function showDemoAlert() {
+            alert('O sistema completo requer servidor PHP. Esta é apenas a Landing Page demonstrativa.');
+            return false;
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="landing-nav">
+        <div class="container d-flex justify-content-between align-items-center">
+            <!-- Logo -->
+            <a href="#" class="text-decoration-none d-flex align-items-center gap-2">
+                <img src="images/DinDin_Logo_Option2.png" alt="DinDin Logo" height="35">
+                <span class="h4 mb-0 fw-bold" style="color: var(--bs-primary);">DinDin</span>
+            </a>
+            
+            <div class="d-flex gap-2">
+                <a href="#" onclick="return showDemoAlert()" class="btn btn-outline-primary">Entrar</a>
+                <a href="#" onclick="return showDemoAlert()" class="btn btn-primary">Criar Conta</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Texto Principal -->
+                <div class="col-lg-5 mb-5 mb-lg-0">
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3 border border-primary border-opacity-25">Novidade: Analytics 2.0</span>
+                    <h1 class="hero-headline">Finanças inteligentes, visual moderno.</h1>
+                    <p class="hero-subheadline">
+                        Pare de lutar contra planilhas. O DinDin organiza seus gastos automaticamente e mostra para onde seu dinheiro vai, em qualquer tema.
+                    </p>
+                    <div class="d-flex gap-3 flex-column flex-sm-row">
+                        <a href="#" onclick="return showDemoAlert()" class="btn btn-primary btn-lg shadow-lg">
+                            <i class="bi bi-rocket-takeoff me-2"></i> Começar Grátis
+                        </a>
+                        <a href="#features" class="btn btn-outline-secondary btn-lg">
+                            Saiba Mais
+                        </a>
+                    </div>
+                    
+                    <!-- Checkmarks -->
+                    <div class="mt-4 pt-2 d-flex flex-wrap gap-3 text-muted small">
+                        <span class="d-flex align-items-center gap-1"><i class="bi bi-check-circle-fill text-success"></i> Tema Escuro</span>
+                        <span class="d-flex align-items-center gap-1"><i class="bi bi-check-circle-fill text-success"></i> Gráficos Interativos</span>
+                        <span class="d-flex align-items-center gap-1"><i class="bi bi-check-circle-fill text-success"></i> 100% Seguro</span>
+                    </div>
+                </div>
+
+                <!-- Mockup do Dashboard (CSS Puro) -->
+                <div class="col-lg-7">
+                    <div class="dashboard-mockup">
+                        <!-- Header do Mockup -->
+                        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: var(--bs-border-color) !important;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-secondary bg-opacity-25 rounded-circle" style="width:32px; height:32px;"></div>
+                                <span class="fw-bold small">Meu Painel</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Saldo Positivo</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Gráfico de Rosca -->
+                            <div class="col-md-5">
+                                <div class="card h-100 p-3 border border-secondary border-opacity-10">
+                                    <h6 class="mb-4 text-muted small fw-bold text-uppercase"><i class="bi bi-pie-chart-fill me-1"></i> Por Categoria</h6>
+                                    <div class="donut-chart">
+                                        <div class="donut-hole"></div>
+                                    </div>
+                                    <div class="mt-4 small">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span><i class="bi bi-circle-fill text-danger" style="font-size: 8px;"></i> Aluguel</span>
+                                            <span class="fw-bold">45%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span><i class="bi bi-circle-fill text-warning" style="font-size: 8px;"></i> Lazer</span>
+                                            <span class="fw-bold">30%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="bi bi-circle-fill text-success" style="font-size: 8px;"></i> Transporte</span>
+                                            <span class="fw-bold">25%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gráfico de Linha -->
+                            <div class="col-md-7">
+                                <div class="card h-100 p-3 border border-secondary border-opacity-10">
+                                    <h6 class="mb-2 text-muted small fw-bold text-uppercase"><i class="bi bi-activity me-1"></i> Evolução (6 Meses)</h6>
+                                    
+                                    <div class="line-chart-container">
+                                        <svg class="chart-svg" viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
+                                            <!-- Linha Receitas -->
+                                            <path d="M0,40 C20,35 40,15 60,20 S80,5 100,10" class="path-income" opacity="0.8"/>
+                                            <!-- Linha Despesas -->
+                                            <path d="M0,30 C30,25 50,35 70,25 S90,45 100,35" class="path-expense" opacity="0.8"/>
+                                        </svg>
+                                        
+                                        <!-- Linhas de Grade Fakes -->
+                                        <div style="position:absolute; top:25%; width:100%; border-top:1px dashed var(--bs-border-color); opacity:0.5;"></div>
+                                        <div style="position:absolute; top:50%; width:100%; border-top:1px dashed var(--bs-border-color); opacity:0.5;"></div>
+                                        <div style="position:absolute; top:75%; width:100%; border-top:1px dashed var(--bs-border-color); opacity:0.5;"></div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between text-muted mt-2" style="font-size: 0.7rem;">
+                                        <span>Jun</span><span>Jul</span><span>Ago</span><span>Set</span><span>Out</span><span>Nov</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5" style="background-color: rgba(var(--bs-body-color-rgb), 0.03);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Controle total, sem esforço</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">
+                    Funcionalidades pensadas para simplificar sua rotina financeira, disponíveis em qualquer dispositivo.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon bg-soft-primary">
+                            <i class="bi bi-bar-chart-fill"></i>
+                        </div>
+                        <h4>Analytics</h4>
+                        <p class="text-muted">
+                            Visualização clara de receitas e despesas. Entenda seus hábitos de consumo com gráficos intuitivos.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon bg-soft-success">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        <h4>Categorias</h4>
+                        <p class="text-muted">
+                            Organize seus gastos do seu jeito. Crie categorias personalizadas como "Mercado", "Assinaturas" ou "Viagem".
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon bg-soft-purple">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <h4>Segurança</h4>
+                        <p class="text-muted">
+                            Seus dados são protegidos com criptografia de ponta a ponta. Acesso seguro via login e senha.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-5 border-top" style="background-color: var(--bs-body-bg);">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="images/DinDin_Logo_Option2.png" alt="Logo" height="30" style="filter: grayscale(20%);">
+                        <h5 class="mb-0 fw-bold text-primary">DinDin</h5>
+                    </div>
+                    <p class="text-muted small">
+                        Simples, rápido e eficiente. O controle financeiro que você estava procurando.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Links Úteis</h6>
+                    <ul class="list-unstyled small">
+                        <!-- Links alterados para demonstrativos -->
+                        <li class="mb-2"><a href="#" onclick="return showDemoAlert()" class="text-decoration-none text-muted hover-link">Login</a></li>
+                        <li class="mb-2"><a href="#" onclick="return showDemoAlert()" class="text-decoration-none text-muted hover-link">Criar Conta</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted hover-link">Termos de Uso</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Contato</h6>
+                    <p class="text-muted small mb-2"><i class="bi bi-envelope me-2"></i> contato@dindin.app</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-secondary fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-secondary fs-5"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center pt-4 mt-4 border-top small text-muted">
+                &copy; 2025 DinDin. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botão Toggle Theme (Flutuante) -->
+    <div class="theme-toggle-float" id="themeToggle" title="Alternar Tema">
+        <i class="bi bi-sun-fill"></i>
+        <i class="bi bi-moon-stars-fill"></i>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script de Tema (Start no Dark) -->
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // 1. Força Dark Mode se não houver preferência salva
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-bs-theme', savedTheme);
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>
