@@ -21,117 +21,94 @@ Com o **DinDin**, você pode:
 ---
 LandingPage: [Clique](https://thales-uft2022-2.github.io/DinDin/)
 ---
-[Apresentação Final da Disciplina](https://www.canva.com/design/DAG5JPbcfXk/gmwWmThA4KlkFPPQw_-PEA/edit?utm_content=DAG5JPbcfXk&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+[Apresentação Final da Disciplina](#)
 ---
-🛠️ Guia de Configuração e Instalação (Developer Setup)
+# 🛠️ Guia de Configuração e Instalação (Developer Setup)
 
 Este documento contém as instruções passo a passo para configurar o ambiente de desenvolvimento do projeto DinDin em sua máquina local.
 
-📋 Pré-requisitos
+## 📋 Pré-requisitos
 
 Antes de começar, certifique-se de ter as seguintes ferramentas instaladas:
 
-XAMPP (ou similar com Apache e MySQL) - Download
+- **XAMPP** (ou similar com Apache e MySQL) - [Download](https://www.apachefriends.org/)
+  - *Recomendado: PHP 8.1 ou superior*
+- **Composer** (Gerenciador de dependências do PHP) 
+- **Git**  
+- **Editor de Código** (VS Code recomendado)
 
-Recomendado: PHP 8.1 ou superior.
+## 🚀 Passo a Passo da Instalação
 
-Composer (Gerenciador de dependências do PHP) - Download
-
-Git - Download
-
-Editor de Código (VS Code recomendado).
-
-🚀 Passo a Passo da Instalação
-
-1. Clonar o Repositório
+### 1. Clonar o Repositório
 
 Abra seu terminal (Git Bash ou CMD) e clone o projeto para a sua máquina.
 
-Se você estiver usando XAMPP, o ideal é clonar diretamente dentro da pasta htdocs.
+Se você estiver usando XAMPP, o ideal é clonar diretamente dentro da pasta `htdocs`:
 
-cd C:\xampp\htdocs
-git clone [https://github.com/Thales-uft2022-2/DinDin](https://github.com/Thales-uft2022-2/DinDin)
-cd DinDin
+```
+bash cd C:\xampp\htdocs git clone https://github.com/Thales-uft2022-2/DinDin
+cd DinDin.
+```
 
 
-2. Instalar Dependências (Backend)
+### 2. Instalar Dependências (Backend)
 
 O projeto utiliza o Composer para gerenciar bibliotecas (como o PHPMailer e o PHPUnit). Na raiz do projeto (dentro da pasta DinDin), execute:
+```
+composer install phpunit
+composer install phpmailer
+```
+Isso criará a pasta `vendor/` com todas as bibliotecas necessárias.
 
-composer install
+### 3. Configurar o Banco de Dados
 
+1. Inicie o Apache e o MySQL no painel de controle do XAMPP
+2. Acesse o phpMyAdmin no navegador: `http://localhost/phpmyadmin`
+3. Crie um novo banco de dados chamado `dindin` (ou o nome definido no seu config.php)
+   - *Collation recomendada: `utf8mb4_unicode_ci`*
+4. Importe o esquema do banco:
+   - Selecione o banco criado
+   - Vá na aba **Importar**
+   - Escolha o arquivo `dindin.sql` localizado na raiz do projeto
+   - Clique em **Executar**
 
-Isso criará a pasta vendor/ com todas as bibliotecas necessárias.
+### 4. Configurar Variáveis de Ambiente
 
-3. Configurar o Banco de Dados
+Verifique o arquivo `config/config.php` (ou crie um arquivo `.env` se o projeto utilizar) para garantir que as credenciais do banco estão corretas para o seu ambiente XAMPP padrão.
 
-Inicie o Apache e o MySQL no painel de controle do XAMPP.
+**Exemplo padrão do XAMPP:**
+- **Host:** `localhost`
+- **User:** `root`
+- **Password:** `` (vazio)
+- **Database:** `dindin`
 
-Acesse o phpMyAdmin no navegador: http://localhost/phpmyadmin.
+### 5. Executar o Projeto
 
-Crie um novo banco de dados chamado dindin (ou o nome definido no seu config.php).
-
-Collation recomendada: utf8mb4_unicode_ci.
-
-Importe o esquema do banco:
-
-Selecione o banco criado.
-
-Vá na aba Importar.
-
-Escolha o arquivo dindin.sql localizado na raiz do projeto.
-
-Clique em Executar.
-
-4. Configurar Variáveis de Ambiente
-
-Verifique o arquivo config/config.php (ou crie um arquivo .env se o projeto utilizar) para garantir que as credenciais do banco estão corretas para o seu ambiente XAMPP padrão.
-
-Exemplo padrão do XAMPP:
-
-Host: localhost
-
-User: root
-
-Password: `` (vazio)
-
-Database: dindin
-
-5. Executar o Projeto
-
-Com o Apache do XAMPP rodando e os arquivos na pasta htdocs, acesse o projeto pelo navegador:
-
-http://localhost/DinDin/public
+Com o Apache do XAMPP rodando e os arquivos na pasta `htdocs`, acesse o projeto pelo navegador:
 
 
-Nota: O ponto de entrada da aplicação é a pasta /public. Se você acessar apenas /DinDin, navegue até a pasta public.
+```http://localhost/DinDin/public```
 
-🧪 Rodando os Testes (PHPUnit)
+> **Nota:** O ponto de entrada da aplicação é a pasta `/public`. Se você acessar apenas `/DinDin`, navegue até a pasta `public`.
+
+## 🧪 Rodando os Testes (PHPUnit)
 
 Para garantir que tudo está funcionando corretamente, execute os testes unitários.
 
 No terminal, na raiz do projeto:
 
-./vendor/bin/phpunit
+bash
+```./vendor/bin/phpunit```
 
+Se todos os testes passarem (✅ **ficar verde**), seu ambiente está configurado e pronto para o desenvolvimento!
 
-(No Windows, pode ser necessário usar vendor\bin\phpunit)
+## 📂 Estrutura de Pastas Importantes
 
-Se todos os testes passarem (ficar verde), seu ambiente está configurado e pronto para o desenvolvimento! ✅
-
-📂 Estrutura de Pastas Importantes
-
-app/ - Lógica do sistema (Controllers, Models, Services).
-
-public/ - Arquivos acessíveis publicamente (CSS, JS, Index.php).
-
-config/ - Arquivos de configuração (Banco de dados, etc).
-
-views/ - Telas e templates HTML/PHP.
-
-tests/ - Testes unitários.
-
----
+- `app/` - Lógica do sistema (Controllers, Models, Services)
+- `public/` - Arquivos acessíveis publicamente (CSS, JS, Index.php)
+- `config/` - Arquivos de configuração (Banco de dados, etc)
+- `views/` - Telas e templates HTML/PHP
+- `tests/` - Testes unitários---
 # Planejamento de Sprints
 
 ## Sprint 1: Transações
